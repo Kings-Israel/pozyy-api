@@ -13,21 +13,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-<<<<<<< HEAD
-Route::get('/', function () {
-    return view('welcome');
-});
-
-Route::get('/php', function() {
-	return view('php');
-=======
 Route::get('/php', function() {
     return view('php');
 });
 
 Route::get('/', function () {
     return view('welcome');
->>>>>>> 6e5e6a46d81753dd0fdd1e5ae931679e87419a02
 });
 
 Auth::routes();
