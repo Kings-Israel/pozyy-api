@@ -242,13 +242,20 @@ class GamesController extends Controller
 
     public function getNewPicGame()
     {
+        $newGame = null;
         // Get all games
-        $allGames = TwoPicsGame::all();
+        $allGames = TwoPicsGame::inRandomOrder()->get();
         // Check if user has played the game
         foreach ($allGames as $game) {
             if (!$game->userHasPlayed(auth()->user())) {
-                return pozzy_httpOk($game);
+                $newGame = $game;
             }
+        }
+
+        if ($newGame != null) {
+            return pozzy_httpOk($newGame);
+        } else {
+            return pozzy_httpOk('No new game found');
         }
     }
 
