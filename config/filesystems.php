@@ -88,21 +88,12 @@ return [
             'url' => env('APP_URL').'/storage/videos',
             'visibility' => 'public'
         ],
-<<<<<<< HEAD
-        'trivia' => [
-            'driver' => 'local',
-            'root' => storage_path('app/public/trivia'),
-            'url' => env('APP_URL').'/storage/trivia',
-            'visibility' => 'public'
-        ]
-=======
         'games' => [
             'driver' => 'local',
             'root' => storage_path('app/public/games'),
             'url' => env('APP_URL').'/storage/games',
             'visibility' => 'public'
         ],
->>>>>>> 6e5e6a46d81753dd0fdd1e5ae931679e87419a02
     ],
 
     /*
