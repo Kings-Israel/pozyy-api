@@ -42,6 +42,7 @@ Route::group([
 
 Route::group(['middleware' => 'jwt.auth'], function ($router) {
     // Trivia
+<<<<<<< HEAD
     Route::get('/trivias', 'TriviaController@getAllTrivias');
     Route::get('/trivia/categories', 'TriviaController@getTriviaCategories');
     Route::get('/trivia/{id}/questions', 'TriviaController@getTriviaQuestions');
@@ -51,6 +52,25 @@ Route::group(['middleware' => 'jwt.auth'], function ($router) {
     Route::post('/trivia/update', 'TriviaController@updateTrivia');
     Route::post('/add/trivia/question', 'TriviaController@addTriviaQuestions');
     Route::delete('/trivia/question/{id}/delete', 'TriviaController@deleteTriviaQuestion');
+=======
+    Route::get('/trivias', 'GamesController@getAllTrivias');
+    Route::get('/trivia/categories', 'GamesController@getTriviaCategories');
+    Route::get('/trivia/{id}/questions', 'GamesController@getTriviaQuestions');
+    Route::delete('/trivia/{id}/delete', 'GamesController@deleteTrivia');
+    Route::post('/trivia/category', 'GamesController@addTriviaCategory');
+    Route::post('/add/trivia', 'GamesController@addTrivia');
+    Route::post('/trivia/update', 'GamesController@updateTrivia');
+    Route::post('/add/trivia/question', 'GamesController@addTriviaQuestions');
+    Route::delete('/trivia/question/{id}/delete', 'GamesController@deleteTriviaQuestion');
+
+    Route::get('/twopicsgames', 'GamesController@getPicsGames');
+    Route::post('/twopicsgame', 'GamesController@addPicsGame');
+    Route::delete('/twopicsgame/{id}/delete', 'GamesController@deleteTwoPicsGame');
+    Route::post('/twopicsgame/update', 'GamesController@updateTwoPicsGame');
+
+    Route::get('/picture/game/new', 'GamesController@getNewPicGame');
+    Route::post('/picture/game/save', 'GamesController@saveSolvedPicGame');
+>>>>>>> 6e5e6a46d81753dd0fdd1e5ae931679e87419a02
 
     //Grade
     Route::resource('/grades', 'GradeController');
