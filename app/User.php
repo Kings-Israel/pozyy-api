@@ -67,4 +67,14 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
+
+    /**
+     * Get all of the twoPicsGames for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function twoPicsGames()
+    {
+        return $this->hasMany(TwoPicsGame::class, 'users_two_pics_games');
+    }
 }
