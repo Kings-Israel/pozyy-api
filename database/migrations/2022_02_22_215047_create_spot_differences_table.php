@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateUsersTwoPicsGamesTable extends Migration
+class CreateSpotDifferencesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,12 @@ class CreateUsersTwoPicsGamesTable extends Migration
      */
     public function up()
     {
-        Schema::create('users_two_pics_games', function (Blueprint $table) {
+        Schema::create('spot_differences', function (Blueprint $table) {
             $table->id();
-            $table->unique(['user_id', 'two_pics_game_id']);
-            $table->foreignId('user_id');
-            $table->foreignId('two_pics_game_id')->nullable();
+            $table->string('firstImagePath');
+            $table->string('secondImagePath');
+            $table->json('differences');
+            $table->bigInteger('duration')->nullable();
             $table->timestamps();
         });
     }
@@ -29,6 +30,6 @@ class CreateUsersTwoPicsGamesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('users_two_pics_games');
+        Schema::dropIfExists('spot_differences');
     }
 }

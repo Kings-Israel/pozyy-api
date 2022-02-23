@@ -60,6 +60,14 @@ Route::group(['middleware' => 'jwt.auth'], function ($router) {
     Route::get('/picture/game/new', 'GamesController@getNewPicGame');
     Route::post('/picture/game/save', 'GamesController@saveSolvedPicGame');
 
+    Route::get('/spotdifference/all', 'GamesController@getSpotDifferenceGames');
+    Route::post('/spotdifference/add', 'GamesController@addSpotDifferenceGame');
+    Route::delete('/spotdifference/{id}/delete', 'GamesController@deleteSpoDifferenceGame');
+    Route::post('/spotdifference/update', 'GamesController@updateSpotDifferenceGame');
+
+    Route::get('/spotdifference/new', 'GamesController@getNewSpotDifferenceGame');
+    Route::post('/spotdifference/save', 'GamesController@saveSpotDifferenceResponse');
+
     //Grade
     Route::resource('/grades', 'GradeController');
 
