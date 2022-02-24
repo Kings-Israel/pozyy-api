@@ -20,13 +20,8 @@ Route::post('/add/video', 'Video\videocontroller@admin_add_video');
 
 Route::get('/add', 'UserController@index')->name('user');
 
-// Route::middleware('auth:api')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
-
 Route::group([
     'middleware' => 'api',
-    // 'namespace' => 'App\Http\Controllers',
     'prefix' => 'auth'
 ], function ($router) {
     Route::post('login', 'AuthController@login');
@@ -52,6 +47,10 @@ Route::group(['middleware' => 'jwt.auth'], function ($router) {
     Route::post('/add/trivia/question', 'GamesController@addTriviaQuestions');
     Route::delete('/trivia/question/{id}/delete', 'GamesController@deleteTriviaQuestion');
 
+    Route::get('/trivia/{id}/question/new', 'GamesController@getNewTriviaQuestion');
+    Route::post('/trivia/save', 'GamesController@saveSolvedTriviaQuestion');
+
+    // Two Pictures One Word
     Route::get('/twopicsgames', 'GamesController@getPicsGames');
     Route::post('/twopicsgame', 'GamesController@addPicsGame');
     Route::delete('/twopicsgame/{id}/delete', 'GamesController@deleteTwoPicsGame');
@@ -60,6 +59,7 @@ Route::group(['middleware' => 'jwt.auth'], function ($router) {
     Route::get('/picture/game/new', 'GamesController@getNewPicGame');
     Route::post('/picture/game/save', 'GamesController@saveSolvedPicGame');
 
+    // Spot the difference
     Route::get('/spotdifference/all', 'GamesController@getSpotDifferenceGames');
     Route::post('/spotdifference/add', 'GamesController@addSpotDifferenceGame');
     Route::delete('/spotdifference/{id}/delete', 'GamesController@deleteSpoDifferenceGame');

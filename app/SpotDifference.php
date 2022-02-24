@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class SpotDifference extends Model
 {
@@ -18,7 +19,7 @@ class SpotDifference extends Model
             return false;
         }
 
-        $exists = DB::table('users_two_pics_games')->where('user_id', $user->id)->where('spot_differences_id', $this->id)->first();
+        $exists = DB::table('users_games_played')->where('user_id', $user->id)->where('spot_difference_id', $this->id)->first();
         return $exists;
     }
 }

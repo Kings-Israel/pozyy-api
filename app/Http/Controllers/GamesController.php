@@ -169,6 +169,61 @@ class GamesController extends Controller
         return pozzy_httpOk($question);
     }
 
+    public function getNewTriviaQuestion($id)
+    {
+        $newGame = null;
+        // Get all games
+        $allGames = TriviaQuestion::inRandomOrder()->where('trivia_id', $id)->get();
+        // Check if user has played the game
+        foreach ($allGames as $game) {
+            if (!$game->userHasPlayed(auth()->user())) {
+                $newGame = $game;
+            }
+        }
+
+        if ($newGame != null) {
+            return pozzy_httpOk($newGame);
+        } else {
+            return pozzy_httpOk('No new game found');
+        }
+
+    }
+
+    public function saveSolvedTriviaQuestion(Request $request)
+    {
+        $rules = [
+            'question_id' => ['required'],
+            'answer' => ['required'],
+            'duration' => ['required']
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $question = TriviaQuestion::find($request->question_id);
+        $correctAnswer = '';
+
+        for ($i=0; $i < count($question->options); $i++) {
+            if ($question->options[$i][key($question->options[$i])] === true) {
+                $correctAnswer = key($question->options[$i]);
+            }
+        }
+
+        if (strtolower($request->answer) != strtolower($correctAnswer)) {
+            return pozzy_httpBadRequest('The answer submitted was not correct');
+        }
+
+        DB::table('users_games_played')->updateOrInsert(
+            ['user_id' => auth()->user()->id],
+            ['trivia_id' => $request->question_id]
+        );
+
+        return pozzy_httpOk('Game saved');
+    }
+
     public function getPicsGames()
     {
         $picsGames = TwoPicsGame::all();
@@ -282,7 +337,9 @@ class GamesController extends Controller
     public function saveSolvedPicGame(Request $request)
     {
         $rules = [
-            'game_id' => ['required']
+            'game_id' => ['required'],
+            'answer' => ['required'],
+            'duration' => ['required'],
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -291,10 +348,16 @@ class GamesController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        DB::table('user_two_pics_games')->insert([
-            'user_id' => auth()->user()->id,
-            'two_pics_game_id' => $request->game_id
-        ]);
+        $answer = TwoPicsGame::find($request->game_id);
+
+        if (strtolower($answer->answer) != strtolower($request->answer)) {
+            return pozzy_httpBadRequest('The answer is not correct');
+        }
+
+        DB::table('users_games_played')->updateOrInsert(
+            ['user_id' => auth()->user()->id],
+            ['two_pics_games_id' => $request->game_id]
+        );
 
         return pozzy_httpOk('Game saved');
     }
@@ -418,10 +481,12 @@ class GamesController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        DB::table('user_two_pics_games')->insert([
-            'user_id' => auth()->user()->id,
-            'spot_differences_id' => $request->game_id
-        ]);
+        // Compare response with the differences
+
+        DB::table('users_games_played')->updateOrInsert(
+            ['user_id' => auth()->user()->id],
+            ['spot_difference_id' => $request->game_id]
+        );
 
         return pozzy_httpOk('Game saved');
     }

@@ -25,7 +25,7 @@ class TwoPicsGame extends Model
             return false;
         }
 
-        $exists = DB::table('users_two_pics_games')->where('user_id', $user->id)->where('two_pics_game_id', $this->id)->first();
+        $exists = DB::table('users_games_played')->where('user_id', $user->id)->where('two_pics_games_id', $this->id)->first();
         return $exists;
     }
 }

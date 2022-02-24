@@ -14,5 +14,6 @@ class DatabaseSeeder extends Seeder
         $this->call(RoleSeeder::class); //ensure order to create roles first
         $this->call(UserSeeder::class);
         $this->call(TestCategorySeeder::class);
+        $this->call(GamesSeeder::class);
     }
 }

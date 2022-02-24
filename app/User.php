@@ -77,4 +77,14 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(TwoPicsGame::class, 'users_two_pics_games');
     }
+
+    /**
+     * Get the leaderboard associated with the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function leaderboard()
+    {
+        return $this->hasOne(GamesLeaderboard::class);
+    }
 }

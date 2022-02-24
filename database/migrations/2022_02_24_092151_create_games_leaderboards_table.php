@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTriviaQuestionsTable extends Migration
+class CreateGamesLeaderboardsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,11 @@ class CreateTriviaQuestionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('trivia_questions', function (Blueprint $table) {
+        Schema::create('games_leaderboards', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('trivia_id');
-            $table->text('text');
-            $table->bigInteger('duration');
-            $table->json('options');
+            $table->foreignId('user_id');
+            $table->bigInteger('total_points');
+            $table->bigInteger('total_time');
             $table->timestamps();
         });
     }
@@ -30,6 +29,6 @@ class CreateTriviaQuestionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('trivia_questions');
+        Schema::dropIfExists('games_leaderboards');
     }
 }

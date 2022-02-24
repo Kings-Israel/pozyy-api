@@ -10,7 +10,7 @@ use Auth;
 use App\Models\Grade;
 
 class studentscontroller extends Controller
-{    
+{
 
     public function all_channels(Request $request){
         $data = Channel::where('school_id',null)->where('suspend',0)->get();
@@ -27,7 +27,7 @@ class studentscontroller extends Controller
             $data = Video::where([['school_id', null],['grade_id', $request->grade_id]])
                         ->get();
             return pozzy_httpOk($data);
-        }        
+        }
     }
     public function school_video(Request $request) {
         $this->validate($request, ['school_id' => 'required', 'grade_id' => 'required','stream_id' => 'required']);
@@ -60,9 +60,9 @@ class studentscontroller extends Controller
                 'fname' => $request->fname,
                 'lname' => $request->lname,
                 'gender' => $request->gender,
-                'grade_id' => $gradeId,
+                // 'grade_id' => $gradeId,
                 'parent_id' => Auth::user()->id,
-                'school_id' => Auth::user()->school_id
+                // 'school_id' => Auth::user()->school_id
             ];
             Kid::create($data);
             return pozzy_httpCreated('Student added successfully');
@@ -96,7 +96,7 @@ class studentscontroller extends Controller
     public function get_kids(){
         if(Auth::user()->getRoleNames()[0] == 'parent') {
             $kids = Kid::where('parent_id', Auth::user()->id)->get();
-            return pozzy_httpOk($kids);            
+            return pozzy_httpOk($kids);
         }
         return pozzy_httpForbidden('Oops, you have no right to perform this operation');
     }

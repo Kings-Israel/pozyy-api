@@ -2,8 +2,8 @@
 
 namespace App;
 
-use App\Casts\Json;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class TriviaQuestion extends Model
 {
@@ -21,5 +21,15 @@ class TriviaQuestion extends Model
     public function trivia()
     {
         return $this->belongsTo(Trivia::class);
+    }
+
+    public function userHasPlayed(?User $user)
+    {
+        if (!$user) {
+            return false;
+        }
+
+        $exists = DB::table('users_games_played')->where('user_id', $user->id)->where('trivia_id', $this->id)->first();
+        return $exists;
     }
 }
