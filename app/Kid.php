@@ -20,6 +20,16 @@ class Kid extends Model
      */
     public function school()
     {
-        return $this->hasOne(School::class, 'id', 'school_id');
+        return $this->belongsTo(School::class, 'id', 'school_id');
+    }
+
+    /**
+     * Get the leaderboard associated with the Kid
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function leaderboard()
+    {
+        return $this->hasOne(GamesLeaderboard::class, 'user_id');
     }
 }

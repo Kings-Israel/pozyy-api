@@ -13,8 +13,8 @@ class GamesLeaderboard extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function user()
+    public function kid()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Kid::class, 'user_id', 'user_id');
     }
 }

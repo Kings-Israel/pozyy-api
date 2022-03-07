@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\GamesLeaderboard;
 use App\Kid;
+use App\School;
 use App\SpotDifference;
 use App\Trivia;
 use App\TriviaCategory;
@@ -545,13 +546,11 @@ class GamesController extends Controller
 
     public function school_leaderboard($id)
     {
-        $leaderboard = GamesLeaderboard::all();
-
-        $leaderboard->filter(function () use ($id) {
-            $kid = Kid::where('school_id', $id)->get();
-            return $kid;
+        $kids = Kid::where('school_id', $id)->get();
+        $kids->filter(function ($kid) {
+            $kid->leaderboard()->exists();
         });
 
-        return pozzy_httpOk($leaderboard);
+        return pozzy_httpOk($kids->load('leaderboard'));
     }
 }
