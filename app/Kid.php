@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Kid extends Model
 {
     protected $guarded = ['id'];
-    
+
     public function parent()
     {
         return $this->hasOne(User::class, 'id', 'parent_id');
@@ -20,6 +20,6 @@ class Kid extends Model
      */
     public function school()
     {
-        return $this->hasOne(School::class);
+        return $this->hasOne(School::class, 'id', 'school_id');
     }
 }

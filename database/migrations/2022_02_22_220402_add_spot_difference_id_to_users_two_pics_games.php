@@ -27,7 +27,7 @@ class AddSpotDifferenceIdToUsersTwoPicsGames extends Migration
     public function down()
     {
         Schema::table('users_two_pics_games', function (Blueprint $table) {
-            //
+            $table->dropColumn('spot_differences_id');
         });
     }
 }

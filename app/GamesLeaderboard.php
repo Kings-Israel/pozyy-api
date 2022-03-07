@@ -17,9 +17,4 @@ class GamesLeaderboard extends Model
     {
         return $this->belongsTo(User::class);
     }
-
-    public function setTotalTimeAttribute($value)
-    {
-        $this->attribute['total_time'] = $value * 60 * 60;
-    }
 }

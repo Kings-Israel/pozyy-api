@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddSuchannelsToChannelsTable extends Migration
+class AddSchoolRegisterIdToSchoolsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddSuchannelsToChannelsTable extends Migration
      */
     public function up()
     {
-        Schema::table('channels', function (Blueprint $table) {
-            $table->json('subchannels')->nullable();
+        Schema::table('schools', function (Blueprint $table) {
+            $table->bigInteger('school_register_id')->unique()->nullable();
         });
     }
 
@@ -25,8 +25,8 @@ class AddSuchannelsToChannelsTable extends Migration
      */
     public function down()
     {
-        Schema::table('channels', function (Blueprint $table) {
-            $table->dropColumn('subchannels');
+        Schema::table('schools', function (Blueprint $table) {
+            $table->dropColumn('school_register_id');
         });
     }
 }

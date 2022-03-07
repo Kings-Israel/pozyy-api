@@ -164,9 +164,9 @@ class AuthController extends Controller
     }
 
     public function parent_login(Request $request) {
-        
+
         $credentials = $request->only('email', 'password');
-        
+
         if($token = $this->guard()->attempt($credentials)) {
             if(Auth::user()->getRoleNames()[0] == 'parent') {
                 return $this->respondWithToken($token);
@@ -222,7 +222,7 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'user' => $this->guard()->user(),
+            'user' => ['fname' => $this->guard()->user()->fname, 'lname' => $this->guard()->user()->lname],
             'role' => $this->guard()->user()->getRoleNames()[0],
             'expires_in' => $this->guard()->factory()->getTTL() * 60
         ]);

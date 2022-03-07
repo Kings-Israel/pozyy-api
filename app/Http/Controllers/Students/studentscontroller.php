@@ -54,13 +54,11 @@ class studentscontroller extends Controller
     }
     public function add_kid(Request $request) {
         if(Auth::user()->getRoleNames()[0] == 'parent') {
-            $gradeId = Grade::where("name", $request->grade)->first();
 
             $data = [
                 'fname' => $request->fname,
                 'lname' => $request->lname,
                 'gender' => $request->gender,
-                // 'grade_id' => $gradeId,
                 'parent_id' => Auth::user()->id,
                 // 'school_id' => Auth::user()->school_id
             ];
@@ -72,7 +70,6 @@ class studentscontroller extends Controller
     public function edit_kid(Request $request, $id) {
         if(Auth::user()->getRoleNames()[0] == 'parent') {
             $kid = Kid::where('id', $id)->first();
-            $gradeId = Grade::where("name", $request->grade)->first();
 
             if($kid->parent_id != Auth::user()->id) {
                 return pozzy_httpForbidden('Oops, you have no privilege to edit student');
@@ -81,7 +78,6 @@ class studentscontroller extends Controller
                 'fname' => $request->fname,
                 'lname' => $request->lname,
                 'gender' => $request->gender,
-                'grade_id' => $gradeId
             ];
             $kid->update($data);
             return pozzy_httpOk('Student edited successfully');

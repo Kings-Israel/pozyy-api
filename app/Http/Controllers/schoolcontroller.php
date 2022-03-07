@@ -3,11 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\{User,School,Stream};
+use App\{Kid, User,School,Stream};
 use App\Models\{Grade,Test,Subject};
 use App\Models\Clubs\{Club,ClubActivity};
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use DB;
 use Auth;
 use Carbon\Carbon;
@@ -16,7 +15,7 @@ class schoolcontroller extends Controller
 {
     public function all_schools() {
         $school = School::with('admin')->get();
-        return response()->json($school);
+        return pozzy_httpOk($school);
     }
 
     public function add_school(Request $request) {
@@ -32,38 +31,49 @@ class schoolcontroller extends Controller
             'password' => 'required'
         ]);
 
-        $exploded = explode(',', $request->logo);
-        $decoded = base64_decode($exploded[1]);
-        if(Str::contains($exploded[0], 'jpeg'))
-            $extension = 'jpg';
-        else
-            $extension = 'png';
-        $fileName = time().'.'.$extension;
-        $path = public_path('logos/').'/'.$fileName;
-        file_put_contents($path, $decoded);
-        DB::transaction(function() use($request, $fileName) {
-            $school = School::create([
-                'name' => $request->name,
-                'logo' => $fileName,
-                'county' => $request->county,
-                'box' => $request->box,
-                'school_contact' => $request->school_contact
-            ]);
+        $school = new School;
+        $school->name = $request->name;
+        $school->logo = config('services.app_url.url').'/storage/school/logo/'.pathinfo($request->logo->store('logo', 'school'), PATHINFO_BASENAME);
+        $school->county = $request->county;
+        $school->box = $request->box;
+        $school->school_contact = $request->school_contact;
+        $school->save();
 
-            $user = new User;
-            $user->school_id = $school->id;
-            $user->username = $request->username;
-            $user->fname = $request->fname;
-            $user->lname = $request->lname;
-            $user->email = $request->email;
-            $user->phone_number = $request->phone_number;
-            $user->password = bcrypt($request->password);
-            $user->save();
-            $user->assignRole('school');
-        });
-        return pozzy_httpCreated('School added');
+        if (Auth::check()) {
+            if (auth()->user()->getRoleNames()[0] === 'admin') {
+                $uniqueId = mt_rand(10000, 99999);
+                $schoolsId = School::all()->pluck('school_register_id');
+                while ($schoolsId->contains($uniqueId)) {
+                    $uniqueId = mt_rand(10000, 99999);
+                }
+                $school->update([
+                    'school_register_id' => $uniqueId,
+                    'suspend' => false
+                ]);
+            }
+        } else {
+            $school->update([
+                'suspend' => true
+            ]);
+        }
+
+
+        $user = new User;
+        $user->school_id = $school->id;
+        $user->username = $request->username;
+        $user->fname = $request->fname;
+        $user->lname = $request->lname;
+        $user->email = $request->email;
+        $user->phone_number = $request->phone_number;
+        $user->password = bcrypt($request->password);
+        $user->save();
+        $user->assignRole('school');
+
+        $school->load('admin');
+
+        return pozzy_httpOk($school);
     }
-    public function edit_school(Request $request, $id) {
+    public function edit_school(Request $request) {
         $this->validate($request, [
             'name' => 'required',
             'box' => 'required',
@@ -73,73 +83,76 @@ class schoolcontroller extends Controller
             'email' => 'required',
             'username' => 'required',
         ]);
-        $edit = School::where('id', $id)->first();
-        $image = $edit->logo;
-        if($request->logo != $image) {
-            $exploded = explode(',', $request->logo);
-            $decoded = base64_decode($exploded[1]);
-            if(Str::contains($exploded[0], 'jpeg'))
-                $extension = 'jpg';
-            else
-                $extension = 'png';
-            $fileName = time().'.'.$extension;
-            $path = public_path('logos/').'/'.$fileName;
-            file_put_contents($path, $decoded);
-        } else {
-            $fileName = $image;
-        }
+        $edit = School::where('id', $request->id)->first();
+
         try {
-            DB::transaction(function() use($edit, $request, $id, $fileName) {
+            DB::transaction(function() use($edit, $request) {
                 $edit->update([
                     'name' => $request->name,
-                    'logo' => $fileName,
                     'county' => $request->county,
                     'box' => $request->box,
                     'school_contact' => $request->school_contact
                 ]);
-                $user = User::where('school_id', $id)->update([
+                if ($request->hasFile('logo')) {
+                    $filePath = $edit->logo;
+                    $file = collect(explode('/', $filePath));
+                    Storage::disk('school')->delete('logo/'.$file->last());
+                    $edit->update([
+                        'logo' => config('services.app_url.url').'/storage/school/logo/'.pathinfo($request->logo->store('logo', 'school'), PATHINFO_BASENAME),
+                    ]);
+                }
+                $user = User::where('school_id', $request->id)->update([
                     'username' => $request->username,
                     'fname' => $request->fname,
                     'lname' => $request->lname,
                     'phone_number' => $request->phone_number
                 ]);
+
+                $edit->load('admin');
+
+                return pozzy_httpOk($edit);
             });
-            return response()->json(['Editted successfully.'], 201);
         } catch(\Exception $e) {
-            return response()->json($e);
+            return pozzy_httpBadRequest($e);
         }
     }
 
     public function suspend_school($id) {
         if(Auth::user()->getRoleNames()[0] == 'admin') {
-            $sc = School::where('id', $id)->update([
-                'suspend' => 1
+            $sc = School::find($id);
+            $sc->update([
+                'suspend' => $sc->suspend == 1 ? 0 : 1
             ]);
-            return response()->json(['School suspended'], 201);
+            return pozzy_httpOk($sc);
         }
-        return response()->json(['Oops, you have no privileges to run this operation'], 401);
-    }
-
-    public function unsuspend_school($id) {
-        if(Auth::user()->getRoleNames()[0] == 'admin') {
-            $sc = School::where('id', $id)->update([
-                'suspend' => 0
-            ]);
-            return response()->json(['School unsuspended'], 201);
-        }
-        return response()->json(['Oops, you have no privileges to run this operation'], 401);
+        return pozzy_httpForbidden('Oops, you have no privileges to run this operation');
     }
 
     public function delete_school($id) {
         //delete all tests and question
+        Test::where('school_id', $id)->delete();
         //detach students from school/
+        $kids = Kid::where('school_id', $id)->get();
+        collect($kids)->each(function ($kid) {
+            $kid->update([
+                'school_id' => NULL
+            ]);
+        });
         //delete teachers and admin
+        $users = User::where('school_id', $id)->get();
+        collect($users)->each(function ($user) {
+            $user->delete();
+        });
         //delete school
+        $school = School::find($id);
+        $school->delete();
+
+        return pozzy_httpOk($school);
     }
 
     public function school_data() {
-        $school = School::with('users')->get();
-        return response()->json($school);
+        $school = School::with('users')->where('id', auth()->user()->school_id)->get();
+        return pozzy_httpOk($school);
     }
 
     public function add_class(Request $request) {

@@ -68,6 +68,10 @@ Route::group(['middleware' => 'jwt.auth'], function ($router) {
     Route::get('/spotdifference/new', 'GamesController@getNewSpotDifferenceGame');
     Route::post('/spotdifference/save', 'GamesController@saveSpotDifferenceResponse');
 
+    // Leaderboard
+    Route::get('/leaderboard', 'GamesController@leaderboard');
+    Route::get('/leaderboard/school/{id}', 'GamesController@school_leaderboard');
+
     //Grade
     Route::resource('/grades', 'GradeController');
 
@@ -117,10 +121,9 @@ Route::group(['middleware' => 'jwt.auth'], function ($router) {
     Route::get('/registered_questions', 'QuestionController@all_questions');
     Route::get('/generate/questions', 'GeneratedQuestionsController@generated_questions');
     Route::get('/system/test', 'GeneratedQuestionsController@get_generated_questions');
-    Route::post('/edit/school/{id}', 'schoolcontroller@edit_school');
+    Route::post('/edit/school', 'schoolcontroller@edit_school');
     Route::post('/suspend/school/{id}', 'schoolcontroller@suspend_school');
-    Route::post('/unsuspend/school/{id}', 'schoolcontroller@unsuspend_school');
-    Route::post('/delete/school/{id}', 'schoolcontroller@delete_school');
+    Route::delete('/delete/school/{id}', 'schoolcontroller@delete_school');
     Route::get('/all_schools', 'schoolcontroller@all_schools');
     Route::group(['prefix' => 'school'], function() {
         Route::get('/users', 'schoolcontroller@school_data');

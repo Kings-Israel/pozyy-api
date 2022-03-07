@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\GamesLeaderboard;
+use App\Kid;
 use App\SpotDifference;
 use App\Trivia;
 use App\TriviaCategory;
@@ -182,6 +184,10 @@ class GamesController extends Controller
         }
 
         if ($newGame != null) {
+            DB::table('users_games_played')->insert(
+                ['user_id' => auth()->user()->id,
+                'trivia_id' => $newGame->id]
+            );
             return pozzy_httpOk($newGame);
         } else {
             return pozzy_httpOk('No new game found');
@@ -192,6 +198,7 @@ class GamesController extends Controller
     public function saveSolvedTriviaQuestion(Request $request)
     {
         $rules = [
+            'kid_id' => ['required'],
             'question_id' => ['required'],
             'answer' => ['required'],
             'duration' => ['required']
@@ -216,10 +223,11 @@ class GamesController extends Controller
             return pozzy_httpBadRequest('The answer submitted was not correct');
         }
 
-        DB::table('users_games_played')->updateOrInsert(
-            ['user_id' => auth()->user()->id],
-            ['trivia_id' => $request->question_id]
-        );
+        $leaderboard = GamesLeaderboard::firstOrNew(['user_id' => $request->kid_id]);
+        $leaderboard->total_points += 5;
+        $time = (int) $question->duration - (int) $request->duration;
+        $leaderboard->total_time += $time;
+        $leaderboard->save();
 
         return pozzy_httpOk('Game saved');
     }
@@ -291,11 +299,8 @@ class GamesController extends Controller
 
         $game = TwoPicsGame::find($request->game_id);
 
-
-        if ($request->hint != '' || $request->hint != null) {
-            $game->hint = $request->hint;
-        }
-
+        $game->answer = $request->answer;
+        $game->hint = $request->hint;
         $game->duration = $request->duration;
 
         if ($request->hasFile('image_one')) {
@@ -328,6 +333,10 @@ class GamesController extends Controller
         }
 
         if ($newGame != null) {
+            DB::table('users_games_played')->insert(
+                ['user_id' => auth()->user()->id,
+                'two_pics_games_id' => $newGame->id]
+            );
             return pozzy_httpOk($newGame);
         } else {
             return pozzy_httpOk('No new game found');
@@ -337,6 +346,7 @@ class GamesController extends Controller
     public function saveSolvedPicGame(Request $request)
     {
         $rules = [
+            'kid_id' => ['required'],
             'game_id' => ['required'],
             'answer' => ['required'],
             'duration' => ['required'],
@@ -354,10 +364,11 @@ class GamesController extends Controller
             return pozzy_httpBadRequest('The answer is not correct');
         }
 
-        DB::table('users_games_played')->updateOrInsert(
-            ['user_id' => auth()->user()->id],
-            ['two_pics_games_id' => $request->game_id]
-        );
+        $leaderboard = GamesLeaderboard::firstOrNew(['user_id' => $request->kid_id]);
+        $leaderboard->total_points += 5;
+        $time = (int) $answer->duration - (int) $request->duration;
+        $leaderboard->total_time += $time;
+        $leaderboard->save();
 
         return pozzy_httpOk('Game saved');
     }
@@ -453,14 +464,21 @@ class GamesController extends Controller
         $newGame = null;
         // Get all games
         $allGames = SpotDifference::inRandomOrder()->get();
-        // Check if user has played the game
+
         foreach ($allGames as $game) {
+            // Check if user has NOT played the game
             if (!$game->userHasPlayed(auth()->user())) {
                 $newGame = $game;
             }
         }
 
         if ($newGame != null) {
+            // Add Game to Games played by user table
+            DB::table('users_games_played')->insert(
+                ['user_id' => auth()->user()->id,
+                'spot_difference_id' => $newGame->id]
+            );
+            // Return game
             return pozzy_httpOk($newGame);
         } else {
             return pozzy_httpOk('No new game found');
@@ -470,6 +488,7 @@ class GamesController extends Controller
     public function saveSpotDifferenceResponse(Request $request)
     {
         $rules = [
+            'kid_id' => ['required'],
             'game_id' => ['required'],
             'differences' => ['required'],
             'duration' => ['required']
@@ -481,13 +500,58 @@ class GamesController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        // Compare response with the differences
+        // Get the type of differences variable
+        $differencesType = gettype($request->differences);
 
-        DB::table('users_games_played')->updateOrInsert(
-            ['user_id' => auth()->user()->id],
-            ['spot_difference_id' => $request->game_id]
-        );
+        // If differences is a string, convert to string
+        $differences = [];
+        if ($differencesType == 'string') {
+            $differences = collect(explode(',', strip_tags($request->differences)))->map(fn ($difference) => strtolower(trim($difference)));
+        } else {
+            $differences = collect($request->differences)->map(fn ($difference) => strtolower($difference));
+        }
+
+        // Compare the response with the differences
+        $answer = SpotDifference::find($request->game_id);
+        $savedDifferences = collect($answer->differences)->map(fn ($difference) => strtolower(trim($difference)));
+        // return response()->json($savedDifferences);
+        $points = 0;
+        collect($differences)->each(function ($difference) use ($savedDifferences, $points) {
+            if($savedDifferences->contains($difference)) {
+                $points += 5;
+            }
+        });
+
+        $leaderboard = GamesLeaderboard::firstOrNew(['user_id' => $request->kid_id]);
+        $leaderboard->total_points += 5;
+        $time = (int) $answer->duration - (int) $request->duration;
+        $leaderboard->total_time += $time;
+        $leaderboard->save();
 
         return pozzy_httpOk('Game saved');
+    }
+
+    public function leaderboard()
+    {
+        $leaderboard = GamesLeaderboard::all();
+
+        $leaderboard->each(function ($kid) {
+            $kidDetails = Kid::find($kid->user_id);
+            $kid['kid'] = $kidDetails->load('school');
+        });
+
+        return pozzy_httpOk($leaderboard);
+    }
+
+    public function school_leaderboard($id)
+    {
+        $leaderboard = GamesLeaderboard::all();
+
+        $leaderboard->filter(function () use ($id) {
+            $kid = Kid::where('school_id', $id)->get();
+            return $kid;
+        });
+
+        return pozzy_httpOk($leaderboard);
     }
 }

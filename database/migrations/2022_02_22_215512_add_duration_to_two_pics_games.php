@@ -26,7 +26,7 @@ class AddDurationToTwoPicsGames extends Migration
     public function down()
     {
         Schema::table('two_pics_games', function (Blueprint $table) {
-            //
+            $table->dropColumn('duration');
         });
     }
 }

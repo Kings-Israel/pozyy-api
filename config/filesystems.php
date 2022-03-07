@@ -94,6 +94,12 @@ return [
             'url' => env('APP_URL').'/storage/games',
             'visibility' => 'public'
         ],
+        'school' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/school'),
+            'url' => env('APP_URL').'/storage/school',
+            'visibility' => 'public'
+        ],
     ],
 
     /*
