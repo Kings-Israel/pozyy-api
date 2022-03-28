@@ -51,6 +51,8 @@ class RouteServiceProvider extends ServiceProvider
         $this->mapStudentRoutes();
 
         $this->mapEventRoutes();
+
+        $this->mapShopRoutes();
     }
 
     /**
@@ -98,5 +100,11 @@ class RouteServiceProvider extends ServiceProvider
             ->middleware('api')
             ->namespace($this->namespace)
             ->group(base_path('routes/event.php'));
+    }
+    protected function mapShopRoutes() {
+        Route::prefix('api')
+            ->middleware('api')
+            ->namespace($this->namespace)
+            ->group(base_path('routes/shop.php'));
     }
 }
