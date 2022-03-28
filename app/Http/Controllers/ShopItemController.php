@@ -78,4 +78,11 @@ class ShopItemController extends Controller
 
         return pozzy_httpOk($item);
     }
+
+    public function singleItem($id)
+    {
+        $item = ShopItem::find($id);
+
+        return pozzy_httpOk($item);
+    }
 }

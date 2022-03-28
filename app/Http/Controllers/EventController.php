@@ -91,4 +91,11 @@ class EventController extends Controller
 
     return pozzy_httpOk($event);
   }
+
+  public function singleEvent($id)
+  {
+      $event = Event::find($id);
+
+      return pozzy_httpOk($event);
+  }
 }

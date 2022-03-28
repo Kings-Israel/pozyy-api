@@ -77,4 +77,14 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasOne(GamesLeaderboard::class);
     }
+
+    /**
+     * Get all of the cartItems for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function cartItems()
+    {
+        return $this->hasMany(Cart::class);
+    }
 }

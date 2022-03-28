@@ -77,6 +77,7 @@ class GamesController extends Controller
     {
         $rules = [
             'category_id' => ['required'],
+            'age_group' => ['required'],
             'title' => ['required'],
             'description' => ['required'],
             'image' => ['required', 'mimes:jpg,png,jpeg']
@@ -90,6 +91,7 @@ class GamesController extends Controller
 
         $trivia = Trivia::create([
             'trivia_category_id' => $request->category_id,
+            'age_group' => $request->age_group,
             'title' => $request->title,
             'description' => strip_tags($request->description),
             'imagePath' => config('services.app_url.url').'/storage/games/trivia/trivia/'.pathinfo($request->image->store('trivia/trivia', 'games'), PATHINFO_BASENAME)
@@ -105,6 +107,7 @@ class GamesController extends Controller
         $rules = [
             'trivia_id' => ['required'],
             'category_id' => ['required'],
+            'age_group' => ['required'],
             'title' => ['required'],
             'description' => ['required'],
         ];
@@ -119,6 +122,7 @@ class GamesController extends Controller
         $trivia->title = $request->title;
         $trivia->description = strip_tags($request->description);
         $trivia->trivia_category_id = $request->category_id;
+        $trivia->age_group = $request->age_group;
 
         if ($request->hasFile('image')) {
             $this->deleteFile($trivia->imagePath, 'trivia/trivia');
@@ -246,6 +250,7 @@ class GamesController extends Controller
             'image_one' => ['required', 'mimes:jpg,png,jpeg'],
             'image_two' => ['required', 'mimes:jpg,png,jpeg'],
             'answer' => ['required'],
+            'age_group' => ['required'],
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -265,6 +270,7 @@ class GamesController extends Controller
         }
 
         $twoPics->duration = $request->duration;
+        $twoPics->age_group = $request->age_group;
 
         $twoPics->pictureOne = config('services.app_url.url').'/storage/games/twopics/'.pathinfo($request->image_one->store('twopics', 'games'), PATHINFO_BASENAME);
         $twoPics->pictureTwo = config('services.app_url.url').'/storage/games/twopics/'.pathinfo($request->image_two->store('twopics', 'games'), PATHINFO_BASENAME);
@@ -289,7 +295,8 @@ class GamesController extends Controller
     public function updateTwoPicsGame(Request $request)
     {
         $rules = [
-            'answer' => ['required']
+            'answer' => ['required'],
+            'age_group' => ['required']
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -303,6 +310,7 @@ class GamesController extends Controller
         $game->answer = $request->answer;
         $game->hint = $request->hint;
         $game->duration = $request->duration;
+        $game->age_group = $request->age_group;
 
         if ($request->hasFile('image_one')) {
             $this->deleteFile($game->pictureOne, 'twopics');
@@ -386,7 +394,8 @@ class GamesController extends Controller
         $rules = [
             'image_one' => ['required', 'mimes:jpg,png,jpeg'],
             'image_two' => ['required', 'mimes:jpg,png,jpeg'],
-            'differences' => ['required']
+            'differences' => ['required'],
+            'age_group' => ['required']
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -398,6 +407,7 @@ class GamesController extends Controller
         $game = new SpotDifference;
 
         $game->differences = collect(explode(',', strip_tags($request->differences)))->map(fn ($difference) => trim($difference));
+        $game->age_group = $request->age_group;
 
         if ($request->duration != '' || $request->duration != null) {
             $game->duration = $request->duration;
@@ -414,7 +424,8 @@ class GamesController extends Controller
     public function updateSpotDifferenceGame(Request $request)
     {
         $rules = [
-            'differences' => ['required']
+            'differences' => ['required'],
+            'age_group' => ['required']
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -426,6 +437,7 @@ class GamesController extends Controller
         $game = SpotDifference::find($request->game_id);
 
         $game->differences = collect(explode(',', strip_tags($request->differences)))->map(fn ($difference) => trim($difference));
+        $game->age_group = $request->age_group;
 
         if ($request->duration != '' || $request->duration != null) {
             $game->duration = $request->duration;
