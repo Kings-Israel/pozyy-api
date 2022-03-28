@@ -100,6 +100,12 @@ return [
             'url' => env('APP_URL').'/storage/school',
             'visibility' => 'public'
         ],
+        'event' => [
+            'driver' => 'local',
+            'root' =>  storage_path('app/public/event'),
+            'url' => env('APP_URL').'/storage/event',
+            'visibility' => 'public'
+        ],
     ],
 
     /*
