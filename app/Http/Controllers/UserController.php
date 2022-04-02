@@ -175,6 +175,6 @@ class UserController extends Controller
     }
     public function total_users() {
         $user = User::get()->count();
-        return response()->json($user);
+        return response()->json($user - 2);
     }
 }

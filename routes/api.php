@@ -117,7 +117,9 @@ Route::group(['middleware' => 'jwt.auth'], function ($router) {
     });
     Route::get('/total_questions', 'QuestionController@total_questions');
     Route::get('/total_tests', 'QuestionController@total_tests');
-    Route::get('/total_users', 'UserController@total_users');
+    Route::get('/total_users', 'HomeController@getAppUsers');
+    Route::get('/user_data_rates', 'HomeController@getUserRegistrationRate');
+    Route::get('/total_schools', 'HomeController@getSchoolsCount');
     Route::get('/registered_questions', 'QuestionController@all_questions');
     Route::get('/generate/questions', 'GeneratedQuestionsController@generated_questions');
     Route::get('/system/test', 'GeneratedQuestionsController@get_generated_questions');
