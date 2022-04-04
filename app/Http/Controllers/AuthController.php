@@ -48,12 +48,12 @@ class AuthController extends Controller
         $user->phone_number = $request->phone_number;
         $user->password = bcrypt($request->password);
 
-        // if ($request->has('school_code')) {
-        //     if ($request->school_code != '' || $request->school_code != NULL) {
-        //         $school = School::where('school_register_id', $request->school_code)->first();
-        //         $user->school_id = $school->id;
-        //     }
-        // }
+        if ($request->has('school_code')) {
+            if ($request->school_code != '' || $request->school_code != NULL) {
+                $school = School::where('school_register_id', $request->school_code)->first();
+                $user->school_id = $school->id;
+            }
+        }
 
         $user->save();
 
