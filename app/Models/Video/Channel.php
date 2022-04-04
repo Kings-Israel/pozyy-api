@@ -10,7 +10,7 @@ class Channel extends Model
     protected $casts = [
         'created_at' => 'datetime:d-m-Y'
     ];
-    public function count_videos() {
+    public function videos() {
         return $this->hasMany(Video::class);
     }
 }

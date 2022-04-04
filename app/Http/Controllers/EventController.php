@@ -94,8 +94,13 @@ class EventController extends Controller
 
   public function singleEvent($id)
   {
-      $event = Event::find($id);
+    $event = Event::find($id);
 
-      return pozzy_httpOk($event);
+    return pozzy_httpOk($event);
+  }
+
+  public function buyTicket(Request $request)
+  {
+    
   }
 }

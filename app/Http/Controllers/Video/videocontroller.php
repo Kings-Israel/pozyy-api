@@ -33,15 +33,15 @@ class videocontroller extends Controller
             return response()->json($validate->messages());
         }
 
-        $exploded = explode(',', $request->thumbnail);
-        $decoded = base64_decode($exploded[1]);
-        if(Str::contains($exploded[0], 'jpeg'))
-            $extension = 'jpg';
-        else
-            $extension = 'png';
-        $fileName = time().'.'.$extension;
-        $path = public_path('storage/thumbnails').'/'.$fileName;
-        file_put_contents($path, $decoded);
+        // $exploded = explode(',', $request->thumbnail);
+        // $decoded = base64_decode($exploded[1]);
+        // if(Str::contains($exploded[0], 'jpeg'))
+        //     $extension = 'jpg';
+        // else
+        //     $extension = 'png';
+        // $fileName = time().'.'.$extension;
+        // $path = public_path('storage/thumbnails').'/'.$fileName;
+        // file_put_contents($path, $decoded);
 
         $user = Auth::user();
         $video = new Video;
@@ -52,11 +52,12 @@ class videocontroller extends Controller
         $video->subject = $request->subject;
         $video->title = $request->title;
         $video->description = strip_tags($request->description);
-        $video->thumbnail = $fileName;
-        $video->video_url = pozzy_videoCompress($request->file('video'), $user);
+        $video->thumbnail = pathinfo($request->thumbnail->store('thubmbnails', 'videos'), PATHINFO_BASENAME);
+        // $video->video_url = pozzy_videoCompress($request->file('video'), $user);
+        $video->video_url = pathinfo($request->video->store('video', 'videos'), PATHINFO_BASENAME);
         $video->subchannel = $request->subchannel;
         $video->save();
-        return pozzy_httpCreated(['message' => 'Video created successfully.', 'video' => $video]);
+        return pozzy_httpCreated($video);
     }
     public function admin_update_video(Request $request) {
         $video = Video::findOrFail($request->id);
@@ -215,11 +216,13 @@ class videocontroller extends Controller
 
         $channel = Channel::create($data);
 
-        return response()->json(['channel' => $channel, 'message' => 'Channel create successfully'],200);
+        return pozzy_httpOk($channel->loadCount('videos'));
+
+        // return response()->json(['channel' => $channel, 'message' => 'Channel create successfully'],200);
         // return pozzy_httpCreated('Channel created successfully.');
     }
     public function all_channel() {
-        $data = Channel::withCount('count_videos')->get();
+        $data = Channel::withCount('videos')->get();
         return pozzy_httpOk($data);
     }
     public function channel_video(Request $request) {
