@@ -51,7 +51,9 @@ class AuthController extends Controller
         if ($request->has('school_code')) {
             if ($request->school_code != '' || $request->school_code != NULL) {
                 $school = School::where('school_register_id', $request->school_code)->first();
-                $user->school_id = $school->id;
+                if ($school) {
+                    $user->school_id = $school->id;
+                }
             }
         }
 
