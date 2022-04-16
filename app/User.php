@@ -89,12 +89,22 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Get all of the eventUserTicket for the User
+     * Get all of the eventUserTickets for the User
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function eventUserTicket()
+    public function eventUserTickets()
     {
         return $this->hasMany(EventUserTicket::class);
+    }
+
+    /**
+     * Get all of the purchasedItems for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function purchasedItems()
+    {
+        return $this->hasMany(UserShopItems::class);
     }
 }

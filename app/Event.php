@@ -17,4 +17,9 @@ class Event extends Model
   {
       return $this->hasMany(EventUserTicket::class);
   }
+
+  public function mpesaPayments()
+  {
+      return $this->morphMany(MpesaPayment::class, 'mpesa_payable');
+  }
 }

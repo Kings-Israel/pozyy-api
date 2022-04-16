@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class EventUserTicket extends Model
 {
+    protected $guarded = [];
+    
     /**
      * Get the user that owns the EventUserTicket
      *
