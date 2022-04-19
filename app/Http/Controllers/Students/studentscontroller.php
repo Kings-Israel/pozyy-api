@@ -8,6 +8,7 @@ use App\Models\Video\{Video,Channel};
 use App\Kid;
 use Auth;
 use App\Models\Grade;
+use App\School;
 
 class studentscontroller extends Controller
 {
@@ -30,27 +31,14 @@ class studentscontroller extends Controller
         }
     }
     public function school_video(Request $request) {
-        $this->validate($request, ['school_id' => 'required', 'grade_id' => 'required','stream_id' => 'required']);
-        if($request->subject_id != null) {
-            $data = Video::where(
-                [
-                    ['school_id', $request->school_id],
-                    ['grade_id', $request->grade_id],
-                    ['subject_id', $request->subject_id],
-                    ['stream_id', $request->stream_id]
-                ]
-            )->get();
-            return pozzy_httpOk($data);
-        } else {
-            $data = Video::where(
-                [
-                    ['school_id', $request->school_id],
-                    ['grade_id', $request->grade_id],
-                    ['stream_id', $request->stream_id]
-                ]
-            )->get();
+        $this->validate($request, ['school_id' => 'required']);
+
+        $data = Video::where('school_id', $request->school_id)->get();
+        if ($data->count()) {
             return pozzy_httpOk($data);
         }
+
+        return pozzy_httpNotFound('No School Videos Found');
     }
     public function add_kid(Request $request) {
         if(Auth::user()->getRoleNames()[0] == 'parent') {
@@ -95,5 +83,18 @@ class studentscontroller extends Controller
             return pozzy_httpOk($kids);
         }
         return pozzy_httpForbidden('Oops, you have no right to perform this operation');
+    }
+
+    public function verifyCode(Request $request)
+    {
+        $this->validate($request, ['code' => 'required']);
+
+        $school = School::where('school_register_id', $request->code)->first();
+
+        if ($school) {
+            return pozzy_httpOk($school);
+        }
+
+        return pozzy_httpNotFound('The code was incorrect');
     }
 }
