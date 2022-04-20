@@ -44,13 +44,14 @@ class CartController extends Controller
             'item_id' => ['required']
         ]);
 
-        $deleted = Cart::where('user_id', auth()->user()->id)->where('shop_item_id', $request->item_id)->first();
+        $item = Cart::where('user_id', auth()->user()->id)->where('shop_item_id', $request->item_id)->first();
 
-        if ($deleted->delete()) {
+        if ($item) {
+            $item->delete();
             return pozzy_httpOk('Item removed from cart');
         }
 
-        return pozzy_httpBadRequest('Error deleting item');
+        return pozzy_httpBadRequest('The item was not found in your cart');
     }
 
     public function checkout(Request $request)
