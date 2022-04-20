@@ -54,6 +54,23 @@ class CartController extends Controller
         return pozzy_httpBadRequest('The item was not found in your cart');
     }
 
+    public function deleteItemsFromCart(Request $request)
+    {
+        $this->validate($request, [
+            'items' => ['required', 'array']
+        ]);
+
+        collect($request->items)->each(function($item) {
+            $cartItem = Cart::where('user_id', auth()->user()->id)->where('shop_item_id', $item)->first();
+
+            if ($cartItem) {
+                $cartItem->delete();
+            }
+        });
+
+        return pozzy_httpOk('Items removed from cart');
+    }
+
     public function checkout(Request $request)
     {
 
