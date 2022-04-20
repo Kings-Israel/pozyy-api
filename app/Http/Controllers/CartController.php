@@ -44,7 +44,7 @@ class CartController extends Controller
             'item_id' => ['required']
         ]);
 
-        $item = Cart::where('user_id', auth()->user()->id)->where('shop_item_id', $request->item_id)->first();
+        $item = Cart::where('user_id', auth()->user()->id)->where('id', $request->item_id)->first();
 
         if ($item) {
             $item->delete();
@@ -64,7 +64,7 @@ class CartController extends Controller
 
         collect($request->items)->each(function($item) {
             info($item);
-            $cartItem = Cart::where('user_id', auth()->user()->id)->where('shop_item_id', $item)->first();
+            $cartItem = Cart::where('user_id', auth()->user()->id)->where('id', $item)->first();
 
             if ($cartItem) {
                 $cartItem->delete();
