@@ -90,8 +90,6 @@ class CartController extends Controller
             $totalAmount += $shopItem->price;
         }
 
-        return response()->json($totalAmount, 200);
-
         $phone_number = auth()->user()->phone_number;
         if (strlen($request->phone_number) == 9) {
             $phone_number = '254'.$request->phone_number;
@@ -103,7 +101,7 @@ class CartController extends Controller
         $transaction = new MpesaPaymentController;
         $results = $transaction->stkPush(
             $phone_number,
-            $request->amount,
+            $totalAmount,
             // route('shop.item.purchase.callback'),
             'https://pozzy.com/api/ticket/callback',
             $account_number,
