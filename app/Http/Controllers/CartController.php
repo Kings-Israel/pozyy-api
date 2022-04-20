@@ -83,12 +83,14 @@ class CartController extends Controller
         ]);
 
         // Get total amount from items chosen
-        $items = collect($request->items)->each(function($item) {
+        $totalAmount = 0;
+        $totalAmount += collect($request->items)->each(function($item) use ($totalAmount) {
             $cartItem = Cart::find($item);
-            return ShopItem::find($cartItem->shop_item_id);
+            $shopItem = ShopItem::find($cartItem->shop_item_id);
+            return $shopItem->price;
         });
 
-        return response()->json($items, 200);
+        return response()->json($totalAmount, 200);
 
         $phone_number = auth()->user()->phone_number;
         if (strlen($request->phone_number) == 9) {
