@@ -84,7 +84,7 @@ class CartController extends Controller
 
         // Get total amount from items chosen
         $totalAmount = 0;
-        $totalAmount += collect($request->items)->each(function($item) use ($totalAmount) {
+        $totalAmount = collect($request->items)->each(function($item) use ($totalAmount) {
             $cartItem = Cart::find($item);
             $shopItem = ShopItem::find($cartItem->shop_item_id);
             return $shopItem->price;
