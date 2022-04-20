@@ -56,8 +56,11 @@ class CartController extends Controller
 
     public function deleteItemsFromCart(Request $request)
     {
+        info($request->all());
         $this->validate($request, [
             'items' => ['required', 'array']
+        ], [
+            'items' => 'Please select item(s) to delete'
         ]);
 
         collect($request->items)->each(function($item) {
