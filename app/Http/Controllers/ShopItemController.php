@@ -93,9 +93,15 @@ class ShopItemController extends Controller
     public function purchaseItem(Request $request)
     {
         $this->validate($request, [
-            'amount' => ['required'],
-            'item_id' => ['required'],
+            'items' => ['required', 'array'],
         ]);
+
+        // Get total amount from items chosen
+        $items = collect($request->items)->each(function($item) {
+            return ShopItem::find($item);
+        });
+
+        return response()->json($items, 200);
 
         $phone_number = Auth::user()->phone_number;
         if (strlen($request->phone_number) == 9) {
