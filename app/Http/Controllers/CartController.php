@@ -56,7 +56,6 @@ class CartController extends Controller
 
     public function deleteItemsFromCart(Request $request)
     {
-        info($request->all());
         $this->validate($request, [
             'items' => ['required', 'array']
         ], [
@@ -64,6 +63,7 @@ class CartController extends Controller
         ]);
 
         collect($request->items)->each(function($item) {
+            info($item);
             $cartItem = Cart::where('user_id', auth()->user()->id)->where('shop_item_id', $item)->first();
 
             if ($cartItem) {
