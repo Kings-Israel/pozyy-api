@@ -10,7 +10,7 @@ class CartController extends Controller
 {
     public function getCart()
     {
-        $cart = auth()->user()->cartItems();
+        $cart = Cart::where('user_id', auth()->user()->id)->get();
 
         return pozzy_httpOk($cart);
     }
