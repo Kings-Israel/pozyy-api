@@ -128,7 +128,7 @@ class ShopItemController extends Controller
 
             auth()->user()->purchasedItems()->create([
                 'shop_item_id' => $shop_item->id,
-                'mpesa_checkout_request_id' => $results['checkout_request_id']
+                'mpesa_checkout_string' => $results['checkout_request_id']
             ]);
         }
     }
@@ -159,7 +159,7 @@ class ShopItemController extends Controller
             $mpesaPayment->mpesa_receipt_number = $result['mpesa_receipt_number'];
             $mpesaPayment->save();
 
-            $userItem = UserShopItems::where('mpesa_checkout_request_id', $result['checkout_request_id'])->first();
+            $userItem = UserShopItems::where('mpesa_checkout_string', $result['checkout_request_id'])->first();
             $userItem->update([
                 'isPurchased' => true
             ]);

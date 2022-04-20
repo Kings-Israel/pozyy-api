@@ -28,7 +28,8 @@ class CartController extends Controller
         }
 
         auth()->user()->cartItems()->create([
-            'item_id' => $request->item_id
+            'shop_item_id' => $request->item_id,
+            'quantity' => 1
         ]);
 
         return pozzy_httpOk('Item added to cart');
@@ -51,6 +52,6 @@ class CartController extends Controller
 
     public function checkout(Request $request)
     {
-        
+
     }
 }
