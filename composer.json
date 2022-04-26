@@ -20,6 +20,7 @@
         "laravel/tinker": "^2.0",
         "laravel/ui": "^2.1",
         "pbmedia/laravel-ffmpeg": "^7.4",
+        "spatie/enum": "^3.12",
         "spatie/laravel-permission": "^3.13",
         "tymon/jwt-auth": "^1.0"
     },

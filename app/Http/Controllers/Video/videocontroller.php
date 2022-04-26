@@ -240,4 +240,16 @@ class videocontroller extends Controller
             return pozzy_httpOk($data);
         }
     }
+
+    public function subchannel_videos(Request $request)
+    {
+        $this->validate($request, [
+            'channel_id' => 'required',
+            'subchannel' => 'required'
+        ]);
+
+        $data = Video::where('channel_id', $request->channel_id)->where('subchannel', $request->subchannel)->get();
+
+        return pozzy_httpOk($data);
+    }
 }

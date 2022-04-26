@@ -22,3 +22,4 @@ Route::group(['prefix' => 'school', 'middleware' => 'api'], function() {
 Route::post('/add/channel', 'Video\videocontroller@add_channel');
 Route::get('/all/channels', 'Video\videocontroller@all_channel');
 Route::post('/channel/videos', 'Video\videocontroller@channel_video');
+Route::post('/subchannel/videos', 'Video\videocontroller@subchannel_videos');

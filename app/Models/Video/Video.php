@@ -16,6 +16,15 @@ class Video extends Model
     public function user() {
         return $this->belongsTo(User::class);
     }
+    /**
+     * Get the channel that owns the Video
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function channel()
+    {
+        return $this->belongsTo(Channel::class);
+    }
     // public function grade() {
     //     return $this->belongsTo(Grade::class);
     // }

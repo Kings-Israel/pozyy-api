@@ -111,6 +111,12 @@ return [
             'root' => storage_path('app/public/shop'),
             'url' => env('APP_URL').'/storage/shop',
             'visibility' => 'public'
+        ],
+        'mobile-media' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/mobile-media'),
+            'url' => env('APP_URL').'/storage/mobile-media',
+            'visibility' => 'public'
         ]
     ],
 

@@ -172,3 +172,5 @@ Route::post('/edit/{id}/subtopic', 'SubtopicController@edit_subtopic');
 
 Route::get('/performance/week', 'schoolcontroller@week');
 
+Route::get('/mobile/media/sections', 'MobileMediaController@getSections');
+
