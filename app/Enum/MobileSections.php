@@ -5,16 +5,20 @@ namespace App\Enum;
 use Spatie\Enum\Enum;
 
 /**
- * @method static self PARENT()
- * @method static self KIDS()
+ * @method static self GUIDE()
+ * @method static self SHOP()
+ * @method static self GAME_NIGHT()
+ * @method static self SCHOOL()
  */
 
 class MobileSections extends Enum {
     protected static function labels(): array
     {
         return [
-            'PARENT' => 'Parent',
-            'KIDS' => 'Kids'
+            'GUIDE' => 'Guide',
+            'SHOP' => 'Shop',
+            'GAME_NIGHT' => 'Game Night',
+            'SCHOOL' => 'School'
         ];
     }
 }

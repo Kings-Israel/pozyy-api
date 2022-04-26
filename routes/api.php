@@ -173,4 +173,7 @@ Route::post('/edit/{id}/subtopic', 'SubtopicController@edit_subtopic');
 Route::get('/performance/week', 'schoolcontroller@week');
 
 Route::get('/mobile/media/sections', 'MobileMediaController@getSections');
+Route::get('/mobile/media/section/{name}', 'MobileMediaController@getThumbnail');
+Route::get('/mobile/media/sections/thumbnails', 'MobileMediaController@getSectionThumbnails');
+Route::post('/mobile/media/thumbnail/update', 'MobileMediaController@updateThumbnail');
 

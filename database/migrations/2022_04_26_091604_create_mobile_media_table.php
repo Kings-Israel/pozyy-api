@@ -16,7 +16,7 @@ class CreateMobileMediaTable extends Migration
         Schema::create('mobile_media', function (Blueprint $table) {
             $table->id();
             $table->string('section');
-            $table->string('thumbnail_url');
+            $table->string('thumbnail_url')->nullable();
             $table->timestamps();
         });
     }
