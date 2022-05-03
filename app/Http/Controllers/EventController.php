@@ -122,8 +122,8 @@ class EventController extends Controller
     $results = $transaction->stkPush(
         $phone_number,
         $request->amount,
-        // route('event.ticket.purchase.callback'),
-        'https://pozzy.com/api/ticket/callback',
+        route('event.ticket.purchase.callback'),
+        // 'https://pozyy.com/api/ticket/callback',
         $account_number,
         'Purchase of Event Ticket'
     );

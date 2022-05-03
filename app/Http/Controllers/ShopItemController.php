@@ -115,8 +115,8 @@ class ShopItemController extends Controller
         $results = $transaction->stkPush(
             $phone_number,
             $request->amount,
-            // route('shop.item.purchase.callback'),
-            'https://pozzy.com/api/ticket/callback',
+            route('shop.item.purchase.callback'),
+            // 'https://pozyy.com/api/ticket/callback',
             $account_number,
             'Purchase of Shop Item'
         );
