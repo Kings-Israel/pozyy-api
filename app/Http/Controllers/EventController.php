@@ -106,7 +106,6 @@ class EventController extends Controller
   public function buyTicket(Request $request)
   {
     $this->validate($request, [
-      'amount' => ['required'],
       'event_id' => ['required'],
     ]);
 
@@ -117,19 +116,28 @@ class EventController extends Controller
         $phone_number = '254'.substr($phone_number, -9);
     }
 
+    $event = Event::find($request->event_id);
+    if (!$event) {
+        return pozzy_httpNotFound('The event was not found');
+    }
+
+    if ($request->has('number_of_tickets')) {
+        $amount = $event->ticket_price * (int) $request->number_of_tickets;
+    } else {
+        $amount = $event->ticket_price;
+    }
+
     $account_number = Str::upper(Str::random(3)).time().Str::upper(Str::random(3));
     $transaction = new MpesaPaymentController;
     $results = $transaction->stkPush(
         $phone_number,
-        $request->amount,
+        $amount,
         route('event.ticket.purchase.callback'),
-        // 'https://pozyy.com/api/ticket/callback',
         $account_number,
         'Purchase of Event Ticket'
     );
 
-    if ($results['response_code'] === 0) {
-        $event = Event::find($request->event_id);
+    if ($results['response_code'] != NULL) {
         $mpesa_payable_type = Event::class;
         MpesaPayment::create([
             'user_id' => Auth::user()->id,
@@ -139,8 +147,9 @@ class EventController extends Controller
             'checkout_request_id' => $results['checkout_request_id']
         ]);
 
-        $event->eventUserTicket()->create([
-            'user_id' => Auth::user()->id,
+        EventUserTicket::create([
+            'user_id' => auth()->user()->id,
+            'event_id' => $event->id,
             'mpesa_checkout_request_id' => $results['checkout_request_id']
         ]);
     }
@@ -161,20 +170,12 @@ class EventController extends Controller
     $amount = $callbackData->Body->stkCallback->CallbackMetadata->Item[0]->Value;
     $mpesa_receipt_number = $callbackData->Body->stkCallback->CallbackMetadata->Item[1]->Value;
 
-    $result = [
-       "result_code" => $result_code,
-       "merchant_request_id" => $merchant_request_id,
-       "checkout_request_id" => $checkout_request_id,
-       "amount" => $amount,
-       "mpesa_receipt_number" => $mpesa_receipt_number,
-    ];
-
-    if($result['result_code'] == 0) {
-        $mpesaPayment = MpesaPayment::where('checkout_request_id', $result['checkout_request_id'])->first();
-        $mpesaPayment->mpesa_receipt_number = $result['mpesa_receipt_number'];
+    if($result_code === 0) {
+        $mpesaPayment = MpesaPayment::where('checkout_request_id', $checkout_request_id)->first();
+        $mpesaPayment->mpesa_receipt_number = $mpesa_receipt_number;
         $mpesaPayment->save();
 
-        $eventUserTicket = EventUserTicket::where('mpesa_checkout_request_id', $result['checkout_request_id'])->first();
+        $eventUserTicket = EventUserTicket::where('mpesa_checkout_request_id', $checkout_request_id)->first();
         $eventUserTicket->update([
             'isPaid' => true,
         ]);
@@ -183,13 +184,18 @@ class EventController extends Controller
 
   public function purchasedTickets()
   {
-    $tickets = auth()->user()->eventUserTickets;
-    $events = [];
+    $tickets = EventUserTicket::where('user_id', auth()->user()->id)->where('isPaid', true)->get();
 
-    foreach ($tickets as $ticket) {
-        array_push($events, Event::find($ticket->event_id));
+    if (!$tickets->isEmpty()) {
+        $events = [];
+        foreach ($tickets as $ticket) {
+            array_push($events, Event::find($ticket->event_id));
+        }
+
+        return pozzy_httpOk($events);
     }
 
-    return pozzy_httpOk($events);
+    return pozzy_httpOk('No tickets bought yet');
+
   }
 }

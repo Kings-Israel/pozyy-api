@@ -20,6 +20,7 @@ Route::group(['middleware' => 'jwt.auth', 'prefix' => 'shop', 'as' => 'shop.'], 
     Route::post('/item/cart/delete', [CartController::class, 'deleteFromCart'])->name('delete-from-cart');
     Route::post('/items/cart/delete', [CartController::class, 'deleteItemsFromCart'])->name('delete-items-from-cart');
     Route::post('/checkout', [CartController::class, 'checkout']);
-    Route::post('/checkout/callback', [CartController::class, 'purchasedItemCallback'])->name('item.purchase.callback');
     Route::get('/items/purchased', [CartController::class, 'purchasedItems'])->name('items.purchased');
 });
+
+Route::post('shop/checkout/callback', [CartController::class, 'purchasedItemCallback'])->name('shop.item.purchase.callback');

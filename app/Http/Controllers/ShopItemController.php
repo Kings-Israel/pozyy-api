@@ -116,7 +116,6 @@ class ShopItemController extends Controller
             $phone_number,
             $request->amount,
             route('shop.item.purchase.callback'),
-            // 'https://pozyy.com/api/ticket/callback',
             $account_number,
             'Purchase of Shop Item'
         );
@@ -152,20 +151,12 @@ class ShopItemController extends Controller
         $amount = $callbackData->Body->stkCallback->CallbackMetadata->Item[0]->Value;
         $mpesa_receipt_number = $callbackData->Body->stkCallback->CallbackMetadata->Item[1]->Value;
 
-        $result = [
-           "result_code" => $result_code,
-           "merchant_request_id" => $merchant_request_id,
-           "checkout_request_id" => $checkout_request_id,
-           "amount" => $amount,
-           "mpesa_receipt_number" => $mpesa_receipt_number,
-        ];
-
-        if($result['result_code'] == 0) {
-            $mpesaPayment = MpesaPayment::where('checkout_request_id', $result['checkout_request_id'])->first();
-            $mpesaPayment->mpesa_receipt_number = $result['mpesa_receipt_number'];
+        if($result_code === 0) {
+            $mpesaPayment = MpesaPayment::where('checkout_request_id', $checkout_request_id)->first();
+            $mpesaPayment->mpesa_receipt_number = $mpesa_receipt_number;
             $mpesaPayment->save();
 
-            $userItem = UserShopItems::where('mpesa_checkout_string', $result['checkout_request_id'])->first();
+            $userItem = UserShopItems::where('mpesa_checkout_string', $checkout_request_id)->first();
             $userItem->update([
                 'isPurchased' => true
             ]);
