@@ -103,8 +103,7 @@ class CartController extends Controller
         $results = $transaction->stkPush(
             $phone_number,
             $totalAmount,
-            // route('shop.item.purchase.callback'),
-            'https://pozzy.com/api/ticket/callback',
+            route('shop.item.purchase.callback'),
             $account_number,
             'Purchase of Shop Item'
         );
@@ -162,7 +161,7 @@ class CartController extends Controller
 
     public function purchasedItems()
     {
-        $purchasedItems = auth()->user()->purchasedItems;
+        $purchasedItems = UserShopItems::where('user_id', auth()->user()->id)->where('isPurchased', true)->get();
         $itemsDetails = [];
 
         foreach ($purchasedItems as $item) {
