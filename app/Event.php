@@ -13,7 +13,7 @@ class Event extends Model
    *
    * @return \Illuminate\Database\Eloquent\Relations\HasMany
    */
-  public function eventUserTicket()
+  public function eventUserTickets()
   {
       return $this->hasMany(EventUserTicket::class);
   }

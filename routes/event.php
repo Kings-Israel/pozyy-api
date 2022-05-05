@@ -9,6 +9,7 @@ Route::group(['middleware' => 'jwt.auth', 'prefix' => 'event', 'as' => 'event.']
   Route::post('/add', [EventController::class, 'addEvent'])->name('add');
   Route::delete('{id}/delete', [EventController::class, 'deleteEvent'])->name('delete');
   Route::post('update', [EventController::class, 'updateEvent'])->name('update');
+  Route::get('/admin/{id}', [EventController::class, 'adminGetEvent'])->name('admin.event');
 
   Route::get('/{id}', [EventController::class, 'singleEvent'])->name('single');
   Route::get('/user/purchased/tickets', [EventController::class, 'purchasedTickets'])->name('user.purchased.tickets');

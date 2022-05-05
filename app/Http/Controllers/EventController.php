@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Event;
 use App\EventUserTicket;
 use App\MpesaPayment;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -101,6 +102,16 @@ class EventController extends Controller
     $event = Event::find($id);
 
     return pozzy_httpOk($event);
+  }
+
+  public function adminGetEvent($id)
+  {
+      $event = Event::find($id);
+      $event->load(['eventUserTickets' => function($query) {
+          return $query->with('user')->where('isPaid', true);
+      }]);
+
+      return pozzy_httpOk($event);
   }
 
   public function buyTicket(Request $request)
