@@ -151,7 +151,7 @@ class schoolcontroller extends Controller
     }
 
     public function school_data() {
-        $school = School::with('users')->where('id', auth()->user()->school_id)->get();
+        $school = School::with(['users', 'kids'])->where('id', auth()->user()->school_id)->get();
         return pozzy_httpOk($school);
     }
 
@@ -370,5 +370,32 @@ class schoolcontroller extends Controller
             array_push($bon, $data);
         }
         dd($bon);
+    }
+
+    public function assignCode(Request $request)
+    {
+        $this->validate($request, [
+            'school_id' => ['required']
+        ]);
+
+        $school = School::find($request->school_id);
+
+        if (!$school) {
+            return pozzy_httpNotFound('School not found');
+        }
+
+        $uniqueId = mt_rand(10000, 99999);
+        $schoolsId = School::all()->pluck('school_register_id');
+        while ($schoolsId->contains($uniqueId)) {
+            $uniqueId = mt_rand(10000, 99999);
+        }
+        $school->update([
+            'school_register_id' => $uniqueId,
+            'suspend' => false
+        ]);
+
+        $school->load('admin');
+
+        return pozzy_httpOk($school);
     }
 }

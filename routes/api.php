@@ -125,6 +125,7 @@ Route::group(['middleware' => 'jwt.auth'], function ($router) {
     Route::get('/system/test', 'GeneratedQuestionsController@get_generated_questions');
     Route::post('/edit/school', 'schoolcontroller@edit_school');
     Route::post('/suspend/school/{id}', 'schoolcontroller@suspend_school');
+    Route::post('/assign/code/school', 'schoolcontroller@assignCode');
     Route::delete('/delete/school/{id}', 'schoolcontroller@delete_school');
     Route::get('/all_schools', 'schoolcontroller@all_schools');
     Route::group(['prefix' => 'school'], function() {

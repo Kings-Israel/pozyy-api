@@ -24,3 +24,17 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+
+Route::get('/config-cache', function() {
+    $execute = Artisan::call('config:cache');
+    return '<h1>Cache facade value cleared</h1>';
+});
+
+Route::get('route-clear', function() {
+    $execute = Artisan::call('route:clear');
+    return '<h1>Routes cached</h1>';
+});
+
+Route::get('/store', function() {
+    Artisan::call('storage:link');
+});
