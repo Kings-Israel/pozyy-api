@@ -206,7 +206,7 @@ class EventController extends Controller
         return pozzy_httpOk($events);
     }
 
-    return pozzy_httpOk('No tickets bought yet');
+    return pozzy_httpNotFound([]);
 
   }
 }
