@@ -92,10 +92,10 @@ class CartController extends Controller
         }
 
         $phone_number = auth()->user()->phone_number;
-        if (strlen($request->phone_number) == 9) {
-            $phone_number = '254'.$request->phone_number;
+        if (strlen($phone_number) == 9) {
+            $phone_number = '254'.$phone_number;
         } else {
-            $phone_number = '254'.substr($request->phone_number, -9);
+            $phone_number = '254'.substr($phone_number, -9);
         }
 
         $account_number = Str::upper(Str::random(3)).time().Str::upper(Str::random(3));
@@ -108,25 +108,32 @@ class CartController extends Controller
             'Purchase of Shop Item'
         );
 
-        if ($results['response_code'] === 0) {
-            $shop_item = ShopItem::find($request->item_id);
+        if ($results['response_code'] != NULL) {
             $mpesa_payable_type = ShopItem::class;
-            MpesaPayment::create([
-                'user_id' => auth()->user()->id,
-                'user_phone_number' => $phone_number,
-                'mpesa_payable_id' => $shop_item->id,
-                'mpesa_payable_type' => $mpesa_payable_type,
-                'checkout_request_id' => $results['checkout_request_id']
-            ]);
+            foreach ($request->items as $item) {
+                $cartItem = Cart::find($item);
+                $shop_item = ShopItem::find($cartItem->shop_item_id);
+                MpesaPayment::create([
+                    'user_id' => auth()->user()->id,
+                    'user_phone_number' => $phone_number,
+                    'mpesa_payable_id' => $shop_item->id,
+                    'mpesa_payable_type' => $mpesa_payable_type,
+                    'checkout_request_id' => $results['checkout_request_id']
+                ]);
 
-            auth()->user()->purchasedItems()->create([
-                'shop_item_id' => $shop_item->id,
-                'mpesa_checkout_string' => $results['checkout_request_id']
-            ]);
+                auth()->user()->purchasedItems()->create([
+                    'shop_item_id' => $shop_item->id,
+                    'mpesa_checkout_string' => $results['checkout_request_id']
+                ]);
+            }
+
+            return pozzy_httpOk('Payment being processed');
         }
+
+        return pozzy_httpNotFound('An error occurred while processing the payment');
     }
 
-    public function purchaseItemCallback(Request $request)
+    public function purchasedItemCallback(Request $request)
     {
         $callbackJSONData = file_get_contents('php://input');
         $callbackData = json_decode($callbackJSONData);
@@ -148,14 +155,18 @@ class CartController extends Controller
         ];
 
         if($result['result_code'] == 0) {
-            $mpesaPayment = MpesaPayment::where('checkout_request_id', $result['checkout_request_id'])->first();
-            $mpesaPayment->mpesa_receipt_number = $result['mpesa_receipt_number'];
-            $mpesaPayment->save();
+            $mpesaPayments = MpesaPayment::where('checkout_request_id', $result['checkout_request_id'])->get();
+            foreach ($mpesaPayments as $payment) {
+                $payment->mpesa_receipt_number = $result['mpesa_receipt_number'];
+                $payment->save();
 
-            $userItem = UserShopItems::where('mpesa_checkout_string', $result['checkout_request_id'])->first();
-            $userItem->update([
-                'isPurchased' => true
-            ]);
+                $userItems = UserShopItems::where('mpesa_checkout_string', $result['checkout_request_id'])->get();
+                foreach ($userItems as $item) {
+                    $item->update([
+                        'isPurchased' => true
+                    ]);
+                }
+            }
         }
     }
 

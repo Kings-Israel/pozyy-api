@@ -10,7 +10,7 @@ Route::group(['prefix' => 'student', 'middleware' => 'jwt.auth'], function() {
     Route::post('/school/videos', 'Students\studentscontroller@school_video');
 });
 
-Route::group(['prefix' => 'parent','middleware' => 'jwt.auth'], function() {
+Route::group(['prefix' => 'parent', 'middleware' => 'jwt.auth'], function() {
     Route::post('/add/student', 'Students\studentscontroller@add_kid');
     Route::get('/students','Students\studentscontroller@get_kids');
     Route::post('/edit/student/{id}', 'Students\studentscontroller@edit_kid');
