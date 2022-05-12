@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::resource('/blogs', 'BlogController');
+Route::post('/blogs/update', 'BlogController@updateBlog');
 
 Route::get('/all/category', 'CategoryController@index');
 Route::post('/category', 'CategoryController@create');

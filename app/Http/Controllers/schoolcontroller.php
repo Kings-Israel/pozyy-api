@@ -217,23 +217,21 @@ class schoolcontroller extends Controller
                 'phone_number' => 'required|min:10',
                 'email' => 'required|email',
                 'password' => 'required',
-                 'username' => 'required'
+                'username' => 'required'
              ]);
 
-             DB::transaction(function() use($request) {
-                $teacher = new User();
-                $teacher->fname = $request->fname;
-                $teacher->lname = $request->lname;
-                $teacher->phone_number = $request->phone_number;
-                $teacher->email = $request->email;
-                $teacher->school_id = Auth::user()->school_id;
-                $teacher->username = $request->username;
-                $teacher->password = bcrypt($request->password);
-                $teacher->save();
-                $teacher->assignRole('teacher');
-             });
+             $teacher = new User();
+             $teacher->fname = $request->fname;
+             $teacher->lname = $request->lname;
+             $teacher->phone_number = $request->phone_number;
+             $teacher->email = $request->email;
+             $teacher->school_id = Auth::user()->school_id;
+             $teacher->username = $request->username;
+             $teacher->password = bcrypt($request->password);
+             $teacher->save();
+             $teacher->assignRole('teacher');
 
-            return response()->json(['Teacher added'], 201);
+            return pozzy_httpOk($teacher);
         } else {
             return response()->json(['Oops, you have no right to perform this operation'], 401);
         }
@@ -254,7 +252,7 @@ class schoolcontroller extends Controller
             }
         )->where('users.school_id', $user->school_id)->get();
 
-        return response()->json($teachers);
+        return pozzy_httpOk($teachers);
     }
     public function all_teacher_streams() {
         if(Auth::user()->getRoleNames()[0] == 'teacher') {
