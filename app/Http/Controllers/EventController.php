@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class EventController extends Controller
@@ -208,5 +209,12 @@ class EventController extends Controller
 
     return pozzy_httpNotFound([]);
 
+  }
+
+  public function viewTicket($id)
+  {
+      $ticket = EventUserTicket::with('user', 'event')->where('id', $id)->first();
+
+      return view('ticket', compact('ticket'));
   }
 }

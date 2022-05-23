@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\EventController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,6 +20,12 @@ Route::get('/php', function() {
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::get('/event/{ticket_id}', [EventController::class, 'viewTicket']);
+
+Route::get('/ticket', function() {
+    return view('ticket');
 });
 
 Auth::routes();
