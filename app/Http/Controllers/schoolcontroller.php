@@ -13,12 +13,14 @@ use Carbon\Carbon;
 
 class schoolcontroller extends Controller
 {
-    public function all_schools() {
+    public function all_schools()
+    {
         $school = School::with('admin')->get();
         return pozzy_httpOk($school);
     }
 
-    public function add_school(Request $request) {
+    public function add_school(Request $request)
+    {
         $this->validate($request, [
             'name' => 'required',
             'logo' => 'required',
@@ -73,7 +75,8 @@ class schoolcontroller extends Controller
 
         return pozzy_httpOk($school);
     }
-    public function edit_school(Request $request) {
+    public function edit_school(Request $request)
+    {
         $this->validate($request, [
             'name' => 'required',
             'box' => 'required',
@@ -117,7 +120,8 @@ class schoolcontroller extends Controller
         }
     }
 
-    public function suspend_school($id) {
+    public function suspend_school($id)
+    {
         if(Auth::user()->getRoleNames()[0] == 'admin') {
             $sc = School::find($id);
             $sc->update([
@@ -128,7 +132,8 @@ class schoolcontroller extends Controller
         return pozzy_httpForbidden('Oops, you have no privileges to run this operation');
     }
 
-    public function delete_school($id) {
+    public function delete_school($id)
+    {
         //delete all tests and question
         Test::where('school_id', $id)->delete();
         //detach students from school/
@@ -150,12 +155,14 @@ class schoolcontroller extends Controller
         return pozzy_httpOk($school);
     }
 
-    public function school_data() {
+    public function school_data()
+    {
         $school = School::with(['users', 'kids'])->where('id', auth()->user()->school_id)->get();
         return pozzy_httpOk($school);
     }
 
-    public function add_class(Request $request) {
+    public function add_class(Request $request)
+    {
         $data = Grade::get();
         foreach($data as $exist) {
             if($exist->school_id == Auth::user()->school_id && $exist->name == $request->name) {
@@ -174,19 +181,22 @@ class schoolcontroller extends Controller
         }
     }
 
-    public function get_grade($id){
+    public function get_grade($id)
+    {
         $grade = Grade::where('id',$id)->with('streams')->get();
         return response()->json($grade[0]);
 
     }
 
-    public function all_grades() {
+    public function all_grades()
+    {
         $user = Auth::user();
         $grade = Grade::where('school_id', $user->school_id)->with('streams')->get();
         return response()->json($grade);
     }
 
-    public function add_stream(Request $request) {
+    public function add_stream(Request $request)
+    {
         $this->validate($request, [
             'grade_id' => 'required',
             'name' => 'required'
@@ -202,14 +212,16 @@ class schoolcontroller extends Controller
         return pozzy_httpForbidden('Oops, you have no right to perform this operation');
     }
 
-    public function get_grade_streams($id){
+    public function get_grade_streams($id)
+    {
         $streams = Stream::where('grade_id',$id)->with('user')->get();
         return response()->json($streams);
 
     }
 
     //teacher
-    public function add_teacher(Request $request){
+    public function add_teacher(Request $request)
+    {
         if(Auth::user()->getRoleNames()[0] == 'school') {
             $this->validate($request, [
                 'fname' => 'required|alpha',
@@ -237,7 +249,8 @@ class schoolcontroller extends Controller
         }
     }
 
-    public function all_teachers(){
+    public function all_teachers()
+    {
         $user = Auth::user();
         // $teachers = User::whereHas(
         //     'roles', function($q){
@@ -254,7 +267,8 @@ class schoolcontroller extends Controller
 
         return pozzy_httpOk($teachers);
     }
-    public function all_teacher_streams() {
+    public function all_teacher_streams()
+    {
         if(Auth::user()->getRoleNames()[0] == 'teacher') {
             $user = Auth::user();
             $data = Stream::where([['user_id', $user->id], ['school_id', $user->school_id]])->get();
@@ -262,7 +276,8 @@ class schoolcontroller extends Controller
         }
         return pozzy_httpForbidden('Oops, you have no right to perform this operation');
     }
-    public function add_teacher_to_Stream(Request $request){
+    public function add_teacher_to_Stream(Request $request)
+    {
         if(Auth::user()->getRoleNames()[0] == 'school') {
             $this->validate($request, [
                 'teacher_id' => 'required',
@@ -288,16 +303,19 @@ class schoolcontroller extends Controller
             return response()->json(['Oops, you have no right to perform this operation'], 401);
         }
     }
-    public function get_tests() {
+    public function get_tests()
+    {
         $user = Auth::User();
         $test = Test::orderBy('id', 'desc')->with('user')->where([['school_id', $user->school_id]])->get(['name','serial_no','time','term','no_questions','created_by','created_at']);
         return pozzy_httpOk($test);
     }
-    public function get_clubs() {
+    public function get_clubs()
+    {
         $clubs = Club::with('user')->get();
         return pozzy_httpOk($clubs);
     }
-    public function add_club(Request $request) {
+    public function add_club(Request $request)
+    {
         if(Auth::user()->getRoleNames()[0] == 'school') {
             $user = Auth::user();
             $club = new Club;
@@ -309,7 +327,8 @@ class schoolcontroller extends Controller
         }
         return pozzy_httpForbidden('Oops, you have no right to perform this operation');
     }
-    public function reassign_teacher(Request $request) {
+    public function reassign_teacher(Request $request)
+    {
         if(Auth::user()->getRoleNames()[0] == 'school') {
             $club = Club::where('id', $request->club_id)->update([
                 'teacher_id' => $request->teacher_id
@@ -318,11 +337,13 @@ class schoolcontroller extends Controller
         }
         return pozzy_httpForbidden('Oops, you have no right to perform this operation');
     }
-    public function all_teacher_subject(Request $request) {
+    public function all_teacher_subject(Request $request)
+    {
         $sub = Subject::where('grade_id', $request->id)->get();
         return pozzy_httpOk($sub);
     }
-    public function add_club_activity(Request $request) {
+    public function add_club_activity(Request $request)
+    {
         if(Auth::user()->getRoleNames()[0] == 'teacher') {
             $user = Auth::user();
             $club = Club::where('teacher_id', $user->id)->first();
@@ -343,18 +364,21 @@ class schoolcontroller extends Controller
         }
         return pozzy_httpForbidden('Oops, you have no right to perform this operation');
     }
-    public function get_clubs_teacher() {
+    public function get_clubs_teacher()
+    {
         $user = Auth::user();
         $club = Club::where('teacher_id', $user->id)->first();
         $act = ClubActivity::where('club_id', $club->id)->get();
         return pozzy_httpOk($act);
     }
-    public function count_tests() {
+    public function count_tests()
+    {
         $user = Auth::User();
         $test = Test::where([['school_id', $user->school_id]])->get()->count();
         return pozzy_httpOk($test);
     }
-    public function week() {
+    public function week()
+    {
         $der = collect();
         foreach(range(-6,0) AS $i) {
             $date = Carbon::yesterday()->addDays($i)->format('Y-m-d');
