@@ -40,6 +40,7 @@ class MpesaPaymentController extends Controller
        curl_setopt($curl, CURLOPT_POST, true);
        curl_setopt($curl, CURLOPT_POSTFIELDS, $data_string);
        $curl_response = curl_exec($curl);
+       info($curl_response);
        $responseObj = json_decode($curl_response);
        $response_details = [
           "merchant_request_id" => $responseObj->MerchantRequestID ?? null,
