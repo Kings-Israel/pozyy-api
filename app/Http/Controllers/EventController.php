@@ -148,7 +148,7 @@ class EventController extends Controller
         $account_number,
         'Purchase of Event Ticket'
     );
-
+    info($results);
     if ($results['response_code'] != NULL) {
         $mpesa_payable_type = Event::class;
         MpesaPayment::create([
