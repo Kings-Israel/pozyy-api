@@ -10,7 +10,7 @@ class Video extends Model
 {
     protected $guarded = ['id'];
     protected $casts = [
-        'created_at' => 'datetime:d-m-Y',
+        'created_at' => 'datetime',
         'subchannels' => 'array'
     ];
     public function user() {
