@@ -52,9 +52,9 @@ class videocontroller extends Controller
         $video->subject = $request->subject;
         $video->title = $request->title;
         $video->description = strip_tags($request->description);
-        $video->thumbnail = pathinfo($request->thumbnail->store('thubmbnails', 'videos'), PATHINFO_BASENAME);
-        // $video->video_url = pozzy_videoCompress($request->file('video'), $user);
-        $video->video_url = pathinfo($request->video->store('video', 'videos'), PATHINFO_BASENAME);
+        $video->thumbnail = pathinfo($request->thumbnail->store('thumbnails', 'videos'), PATHINFO_BASENAME);
+        $video->video_url = pozzy_videoCompress($request->file('video'), $user);
+        // $video->video_url = pathinfo($request->video->store('video', 'videos'), PATHINFO_BASENAME);
         $video->subchannel = $request->subchannel;
         $video->save();
         return pozzy_httpCreated($video);
@@ -87,7 +87,8 @@ class videocontroller extends Controller
 
         Storage::disk('videos')->delete('video/'.$video->video_url);
 
-        unlink(public_path('storage/thumbnails/'.$video->thumbnail));
+        // unlink(public_path('storage/thumbnails/'.$video->thumbnail));
+        Storage::disk('videos')->delete('thumbnails/'.$video->thumbnail);
 
         $video->delete();
         return pozzy_httpOk('Video deleted successfully');
@@ -97,6 +98,8 @@ class videocontroller extends Controller
         foreach ($data as $key => $video) {
             if($video->school_id != null) {
                 $video['school'] = School::find($video->school_id);
+            } else {
+                $video['school'] = null;
             }
         }
         return pozzy_httpOk($data);
