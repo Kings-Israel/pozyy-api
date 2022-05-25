@@ -8,9 +8,9 @@ class Channel extends Model
 {
     protected $guarded = ['id'];
     protected $casts = [
-        'created_at' => 'datetime:d-m-Y'
+        'created_at' => 'datetime'
     ];
-    
+
     public function videos() {
         return $this->hasMany(Video::class);
     }

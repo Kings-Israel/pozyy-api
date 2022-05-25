@@ -183,7 +183,8 @@ class videocontroller extends Controller
 
         Storage::disk('videos')->delete('video/'.$video->video_url);
 
-        unlink(public_path('storage/thumbnails/'.$video->thumbnail));
+        // unlink(public_path('storage/thumbnails/'.$video->thumbnail));
+        Storage::disk('videos')->delete('thumbnails/'.$video->thumbnail);
 
         $video->delete();
         return pozzy_httpOk('Video deleted successfully');
@@ -220,9 +221,43 @@ class videocontroller extends Controller
         $channel = Channel::create($data);
 
         return pozzy_httpOk($channel->loadCount('videos'));
+    }
+    public function update_channel(Request $request) {
+        $rules = [
+            'channel_id' => 'required',
+            'name' => 'required',
+            'description' => 'required',
+            'thumbnail' => 'required'
+        ];
 
-        // return response()->json(['channel' => $channel, 'message' => 'Channel create successfully'],200);
-        // return pozzy_httpCreated('Channel created successfully.');
+        $messages = [
+            'name.required' => 'Please fill in the name',
+            'description.required' => 'Please enter a description',
+            'thumbnail.required' => 'Please upload an image for the thumbnail'
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $messages);
+
+        if ($validate->fails()) {
+            return response()->json($validate->messages());
+        }
+
+        $channel = Channel::find($request->channel_id);
+        $channel->update([
+            'name' => $request->name,
+            'description' => strip_tags($request->description),
+            'subchannels' => json_encode($request->subchannels),
+        ]);
+
+        if($request->hasFile('thumbnail')) {
+            Storage::disk('channel')->delete('thumbnails/'.$channel->thumbnail);
+            $channel->update([
+                'thumbnail' => pathinfo($request->thumbnail->store('thumbnails', 'channel'), PATHINFO_BASENAME)
+            ]);
+        }
+
+        $channels = Channel::withCount('videos')->get();
+        return pozzy_httpOk($channels);
     }
     public function all_channel() {
         $data = Channel::withCount('videos')->get();
