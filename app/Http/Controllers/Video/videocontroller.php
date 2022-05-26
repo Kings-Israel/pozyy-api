@@ -14,7 +14,8 @@ use Illuminate\Support\Facades\Storage;
 
 class videocontroller extends Controller
 {
-    public function admin_add_video(Request $request) {
+    public function admin_add_video(Request $request)
+    {
         $rules = [
             'title' => 'required',
             'thumbnail' => 'required',
@@ -33,15 +34,7 @@ class videocontroller extends Controller
             return response()->json($validate->messages());
         }
 
-        // $exploded = explode(',', $request->thumbnail);
-        // $decoded = base64_decode($exploded[1]);
-        // if(Str::contains($exploded[0], 'jpeg'))
-        //     $extension = 'jpg';
-        // else
-        //     $extension = 'png';
-        // $fileName = time().'.'.$extension;
-        // $path = public_path('storage/thumbnails').'/'.$fileName;
-        // file_put_contents($path, $decoded);
+        sleep(10);
 
         $user = Auth::user();
         $video = new Video;
@@ -59,7 +52,8 @@ class videocontroller extends Controller
         $video->save();
         return pozzy_httpCreated($video);
     }
-    public function admin_update_video(Request $request) {
+    public function admin_update_video(Request $request)
+    {
         $video = Video::findOrFail($request->id);
         $video->title = $request->title;
         $video->description = strip_tags($request->description);
@@ -82,7 +76,8 @@ class videocontroller extends Controller
         $videos = Video::orderBy('id', 'desc')->with(['user'])->get();
         return pozzy_httpOk($videos);
     }
-    public function admin_delete_video(Request $request) {
+    public function admin_delete_video(Request $request)
+    {
         $video = Video::findOrFail($request->id);
 
         Storage::disk('videos')->delete('video/'.$video->video_url);
@@ -93,7 +88,8 @@ class videocontroller extends Controller
         $video->delete();
         return pozzy_httpOk('Video deleted successfully');
     }
-    public function admin_show_videos() {
+    public function admin_show_videos()
+    {
         $data = Video::orderBy('id', 'desc')->with(['user'])->get();
         foreach ($data as $key => $video) {
             if($video->school_id != null) {
@@ -104,15 +100,18 @@ class videocontroller extends Controller
         }
         return pozzy_httpOk($data);
     }
-    public function admin_show_video($id) {
+    public function admin_show_video($id)
+    {
         $video = Video::find($id);
         return pozzy_httpOk($video);
     }
-    public function count_videos() {
+    public function count_videos()
+    {
         $data = Video::get()->count();
         return pozzy_httpOk($data);
     }
-    public function school_add_video(Request $request) {
+    public function school_add_video(Request $request)
+    {
         $user = Auth::user();
         DB::transaction(function() use($request,$user) {
             $video = new Video;
@@ -134,11 +133,13 @@ class videocontroller extends Controller
         });
         return pozzy_httpCreated('Video created successfully.');
     }
-    public function school_show_video($id) {
+    public function school_show_video($id)
+    {
         $video = Video::find($id);
         return pozzy_httpOk($video);
     }
-    public function school_show_videos() {
+    public function school_show_videos()
+    {
         $user = Auth::user();
         if(Auth::user()->getRoleNames()[0] == 'teacher') {
             $video = Video::where([['user_id', $user->id]])->with(['stream'])->get();
@@ -150,12 +151,14 @@ class videocontroller extends Controller
             return pozzy_httpForbidden('Oops, you have no right to perform this operation');
         }
     }
-    public function school_count_videos() {
+    public function school_count_videos()
+    {
         $user = Auth::user();
         $data = Video::where([['school_id', $user->school_id]])->get()->count();
         return pozzy_httpOk($data);
     }
-    public function school_update_video(Request $request) {
+    public function school_update_video(Request $request)
+    {
         $video = Video::findOrFail($request->id);
         $video->title = $request->title;
         $video->description = strip_tags($request->description);
@@ -178,7 +181,8 @@ class videocontroller extends Controller
         $videos = Video::orderBy('id', 'desc')->with(['user'])->get();
         return pozzy_httpOk($videos);
     }
-    public function school_delete_video(Request $request) {
+    public function school_delete_video(Request $request)
+    {
         $video = Video::findOrFail($request->id);
 
         Storage::disk('videos')->delete('video/'.$video->video_url);
@@ -189,7 +193,8 @@ class videocontroller extends Controller
         $video->delete();
         return pozzy_httpOk('Video deleted successfully');
     }
-    public function add_channel(Request $request) {
+    public function add_channel(Request $request)
+    {
         $rules = [
             'name' => 'required',
             'description' => 'required',
@@ -222,7 +227,8 @@ class videocontroller extends Controller
 
         return pozzy_httpOk($channel->loadCount('videos'));
     }
-    public function update_channel(Request $request) {
+    public function update_channel(Request $request)
+    {
         $rules = [
             'channel_id' => 'required',
             'name' => 'required',
@@ -259,11 +265,13 @@ class videocontroller extends Controller
         $channels = Channel::withCount('videos')->get();
         return pozzy_httpOk($channels);
     }
-    public function all_channel() {
+    public function all_channel()
+    {
         $data = Channel::withCount('videos')->get();
         return pozzy_httpOk($data);
     }
-    public function channel_video(Request $request) {
+    public function channel_video(Request $request)
+    {
         $this->validate($request, ['channel_id' => 'required']);
         if($request->grade_id != null) {
             $data = Video::where([
