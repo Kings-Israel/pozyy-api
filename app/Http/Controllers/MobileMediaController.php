@@ -12,30 +12,16 @@ class MobileMediaController extends Controller
     private function deleteFile($filePath, $folder)
     {
         $file = collect(explode('/', $filePath));
-        Storage::disk('games')->delete($folder.'/'.$file->last());
+        Storage::disk('mobile-media')->delete($folder.'/'.$file->last());
     }
     public function getSections()
     {
-        $sections = [
-            MobileSections::GUIDE()->label, MobileSections::SCHOOL()->label, MobileSections::GAME_NIGHT()->label, MobileSections::SHOP()->label
-        ];
-
-        return pozzy_httpOk($sections);
+        return pozzy_httpOk(MobileMedia::all());
     }
 
     public function getSectionThumbnails()
     {
-        $sections = [
-            MobileSections::GUIDE()->label, MobileSections::SCHOOL()->label, MobileSections::GAME_NIGHT()->label, MobileSections::SHOP()->label
-        ];
-
-        $data = [];
-
-        foreach ($sections as $section) {
-            array_push($data, MobileMedia::where('section', $section)->first());
-        }
-
-        return pozzy_httpOk($data);
+        return pozzy_httpOk(MobileMedia::all());
     }
 
     public function getThumbnail(string $name)

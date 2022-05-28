@@ -178,8 +178,15 @@ class videocontroller extends Controller
         }
 
         $video->update();
-        $videos = Video::orderBy('id', 'desc')->with(['user'])->get();
-        return pozzy_httpOk($videos);
+
+        $user = Auth::user();
+        if(Auth::user()->getRoleNames()[0] == 'teacher') {
+            $videos = Video::where('user_id', $user->id)->with(['stream'])->get();
+            return pozzy_httpOk($videos);
+        } else if(Auth::user()->getRoleNames()[0] == 'school') {
+            $videos = Video::where('school_id', $user->school_id)->with(['user'])->get();
+            return pozzy_httpOk($videos);
+        }
     }
     public function school_delete_video(Request $request)
     {

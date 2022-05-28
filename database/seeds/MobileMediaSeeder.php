@@ -14,7 +14,7 @@ class MobileMediaSeeder extends Seeder
     public function run()
     {
         $sections = [
-            MobileSections::GUIDE()->label, MobileSections::GAME_NIGHT()->label, MobileSections::SCHOOL()->label, MobileSections::SHOP()->label
+            MobileSections::SCHOOL_TV()->label, MobileSections::CLUBS()->label, MobileSections::INDOOR()->label, MobileSections::OUTDOOR()->label
         ];
 
         collect($sections)->each(function($section) {

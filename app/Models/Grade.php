@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Models;
+
+use App\KidPerformance;
 use App\Stream;
 use Illuminate\Database\Eloquent\Model;
 
@@ -26,5 +28,15 @@ class Grade extends Model
     }
     public function streams() {
         return $this->hasMany(Stream::class);
+    }
+
+    /**
+     * Get all of the kidsPerformance for the Grade
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function kidsPerformance()
+    {
+        return $this->hasMany(KidPerformance::class);
     }
 }

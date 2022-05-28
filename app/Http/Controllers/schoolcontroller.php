@@ -157,13 +157,26 @@ class schoolcontroller extends Controller
 
     public function school_data()
     {
-        $school = School::with(['users', 'kids'])->where('id', auth()->user()->school_id)->get();
-        return pozzy_httpOk($school);
+        switch (Auth::user()->getRoleNames()[0]) {
+            case 'school':
+                $kids = Kid::with(['parent', 'grade'])->where('school_id', auth()->user()->school_id)->get();
+                break;
+            case 'teacher':
+                // Get Teacher's grade
+                $stream = Stream::where('user_id', auth()->user()->id)->first();
+                $kids = Kid::with(['parent', 'grade'])->where('school_id', auth()->user()->school_id)->where('grade_id', $stream->grade_id)->get();
+                break;
+
+            default:
+                return pozzy_httpForbidden('Oops! You are not allowed to perform this actions');
+                break;
+        }
+        return pozzy_httpOk($kids);
     }
 
     public function add_class(Request $request)
     {
-        $data = Grade::get();
+        $data = Grade::all();
         foreach($data as $exist) {
             if($exist->school_id == Auth::user()->school_id && $exist->name == $request->name) {
                 return pozzy_httpBadRequest('Grade already exists');
@@ -252,18 +265,18 @@ class schoolcontroller extends Controller
     public function all_teachers()
     {
         $user = Auth::user();
-        // $teachers = User::whereHas(
-        //     'roles', function($q){
-        //         $q->where('name','teacher');
-        //     }
-        // )->where('users.school_id', $user->school_id)
-        // ->leftjoin('streams', 'users.id', '=', 'streams.user_id')
-        // ->select('users.*', 'streams.name as stream_name')->get();
         $teachers = User::whereHas(
             'roles', function($q){
                 $q->where('name','teacher');
             }
-        )->where('users.school_id', $user->school_id)->get();
+        )->where('users.school_id', $user->school_id)
+        ->leftjoin('streams', 'users.id', '=', 'streams.user_id')
+        ->select('users.*', 'streams.name as stream_name')->get();
+        // $teachers = User::whereHas(
+        //     'roles', function($q){
+        //         $q->where('name','teacher');
+        //     }
+        // )->where('users.school_id', $user->school_id)->get();
 
         return pozzy_httpOk($teachers);
     }
