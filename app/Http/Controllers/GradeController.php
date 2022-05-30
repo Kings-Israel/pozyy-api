@@ -32,7 +32,7 @@ class GradeController extends Controller
         $validatedData =  Validator::make($request->all(),[
             'name' => 'required | unique:grades',
         ]);
-    
+
         if ($validatedData->fails()){
             return response()->json([
                 'message' => "invalid data",
@@ -47,7 +47,7 @@ class GradeController extends Controller
         // if($request->subject_ids){
         //     $grade->subjects()->attach($request->subject_ids);
         // }
-    
+
         return response()->json([
             "success"=>true,
         ], 200);
@@ -60,7 +60,7 @@ class GradeController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show($id){
-        $grade = Grade::where("id", $id)->with("subjects.topics")->first();
+        $grade = Grade::where("id", $id)->with("subjects")->first();
 
         return response()->json([
             "grade"=>$grade,

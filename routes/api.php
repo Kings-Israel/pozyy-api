@@ -77,7 +77,8 @@ Route::group(['middleware' => 'jwt.auth'], function ($router) {
     Route::resource('/grades', 'GradeController');
 
     //Subject
-    Route::resource('/subjects', 'SubjectController');
+    Route::resource('/subjects', 'SubjectController')->middleware('jwt.auth');
+    Route::get('/grade/{id}/subjects', 'SubjectController@getGradeSubjects')->middleware('jwt.auth');
 
     //Topic
     Route::resource('/topics', 'TopicController');
@@ -132,6 +133,7 @@ Route::group(['middleware' => 'jwt.auth'], function ($router) {
     Route::group(['prefix' => 'school'], function() {
         Route::get('/users', 'schoolcontroller@school_data');
         Route::post('/add/class', 'schoolcontroller@add_class');
+        Route::delete('/class/{id}/delete', 'schoolcontroller@delete_class');
         Route::post('/add/stream', 'schoolcontroller@add_stream');
         Route::get('/grades', 'schoolcontroller@all_grades');
         Route::get('/grades/{id}','schoolcontroller@get_grade');
@@ -178,4 +180,3 @@ Route::get('/mobile/media/sections', 'MobileMediaController@getSections');
 Route::get('/mobile/media/section/{name}', 'MobileMediaController@getThumbnail');
 Route::get('/mobile/media/sections/thumbnails', 'MobileMediaController@getSectionThumbnails');
 Route::post('/mobile/media/thumbnail/update', 'MobileMediaController@updateThumbnail');
-

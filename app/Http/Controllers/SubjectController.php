@@ -8,6 +8,12 @@ use Illuminate\Http\Request;
 
 class SubjectController extends Controller
 {
+    public function index()
+    {
+        $subjects = Subject::with('grade')->where('school_id', auth()->user()->school_id)->get();
+
+        return pozzy_httpOk($subjects);
+    }
     /**
      * Store a newly created resource.
      *
@@ -19,7 +25,7 @@ class SubjectController extends Controller
             'name' => 'required',
             'grade_id' => 'required | exists:grades,id',
         ]);
-    
+
         if ($validatedData->fails()){
             return response()->json([
                 'message' => "invalid data",
@@ -30,12 +36,10 @@ class SubjectController extends Controller
         $subject=Subject::create([
             'name' => $request->name,
             'grade_id' => $request->grade_id,
+            'school_id' => auth()->user()->school_id
         ]);
-        // $discussion->categories()->attach($request->category_ids);
-    
-        return response()->json([
-            "success"=>true,
-        ], 200);
+
+        return pozzy_httpOk($subject);
     }//end store
 
     /**
@@ -45,10 +49,27 @@ class SubjectController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show($id){
-        $subject = Subject::where("id", $id)->with("topics.subtopics")->first();
+        $subject = Subject::where("id", $id)->first();
 
-        return response()->json([
-            "subject"=>$subject,
-        ], 200);
+        return pozzy_httpOk($subject);
     } //end show
+
+    public function destroy($id)
+    {
+        $subject = Subject::find($id);
+
+        $subject->delete();
+
+        return pozzy_httpOk($subject);
+    }
+
+    public function getGradeSubjects($id)
+    {
+        $subjects = Subject::with('grade')
+                        ->where('school_id', auth()->user()->school_id)
+                        ->where('grade_id', $id)
+                        ->get();
+
+        return pozzy_httpOk($subjects);
+    }
 }

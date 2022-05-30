@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Models\Subject;
 use Illuminate\Database\Eloquent\Model;
 
 class School extends Model
@@ -26,5 +27,15 @@ class School extends Model
     public function kids()
     {
         return $this->hasMany(Kid::class, 'school_id');
+    }
+
+    /**
+     * Get all of the subjects for the School
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function subjects()
+    {
+        return $this->hasMany(Subject::class);
     }
 }

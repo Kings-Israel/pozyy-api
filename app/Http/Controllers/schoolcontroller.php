@@ -157,21 +157,15 @@ class schoolcontroller extends Controller
 
     public function school_data()
     {
-        switch (Auth::user()->getRoleNames()[0]) {
-            case 'school':
-                $kids = Kid::with(['parent', 'grade'])->where('school_id', auth()->user()->school_id)->get();
-                break;
-            case 'teacher':
-                // Get Teacher's grade
-                $stream = Stream::where('user_id', auth()->user()->id)->first();
-                $kids = Kid::with(['parent', 'grade'])->where('school_id', auth()->user()->school_id)->where('grade_id', $stream->grade_id)->get();
-                break;
-
-            default:
-                return pozzy_httpForbidden('Oops! You are not allowed to perform this actions');
-                break;
+        $userRole = Auth::user()->getRoleNames()[0];
+        if ($userRole === 'school') {
+            $kids = Kid::with(['parent', 'grade'])->where('school_id', auth()->user()->school_id)->get();
+            return pozzy_httpOk($kids);
+        } elseif ($userRole === 'teacher') {
+            $stream = Stream::where('user_id', auth()->user()->id)->first();
+            $kids = Kid::with(['parent', 'grade'])->where('school_id', auth()->user()->school_id)->where('grade_id', $stream->grade_id)->get();
+            return pozzy_httpOk($kids);
         }
-        return pozzy_httpOk($kids);
     }
 
     public function add_class(Request $request)
@@ -188,23 +182,29 @@ class schoolcontroller extends Controller
             $grade->name = $request->name;
             $grade->user_id = $request->user_id;
             $grade->save();
-            return pozzy_httpCreated('Class added');
+            return pozzy_httpCreated($grade);
         } else {
             return pozzy_httpForbidden('Oops, you have no right to perform this operation');
         }
     }
 
+    public function delete_class($id)
+    {
+        $grade = Grade::find($id);
+        $grade->delete();
+        return pozzy_httpOk($grade);
+    }
+
     public function get_grade($id)
     {
-        $grade = Grade::where('id',$id)->with('streams')->get();
-        return response()->json($grade[0]);
-
+        $grade = Grade::where('id', $id)->with('streams')->first();
+        return pozzy_httpOk($grade);
     }
 
     public function all_grades()
     {
         $user = Auth::user();
-        $grade = Grade::where('school_id', $user->school_id)->with('streams')->get();
+        $grade = Grade::where('school_id', $user->school_id)->with('streams', 'subjects')->get();
         return response()->json($grade);
     }
 
@@ -220,16 +220,15 @@ class schoolcontroller extends Controller
             $stream->grade_id = $request->grade_id;
             $stream->school_id = Auth::user()->school_id;
             $stream->save();
-            return pozzy_httpCreated('Stream added');
+            return pozzy_httpCreated($stream);
         }
         return pozzy_httpForbidden('Oops, you have no right to perform this operation');
     }
 
     public function get_grade_streams($id)
     {
-        $streams = Stream::where('grade_id',$id)->with('user')->get();
-        return response()->json($streams);
-
+        $streams = Stream::with('user')->where('grade_id', $id)->get();
+        return pozzy_httpOk($streams);
     }
 
     //teacher
@@ -270,13 +269,7 @@ class schoolcontroller extends Controller
                 $q->where('name','teacher');
             }
         )->where('users.school_id', $user->school_id)
-        ->leftjoin('streams', 'users.id', '=', 'streams.user_id')
-        ->select('users.*', 'streams.name as stream_name')->get();
-        // $teachers = User::whereHas(
-        //     'roles', function($q){
-        //         $q->where('name','teacher');
-        //     }
-        // )->where('users.school_id', $user->school_id)->get();
+        ->get();
 
         return pozzy_httpOk($teachers);
     }
@@ -295,25 +288,20 @@ class schoolcontroller extends Controller
             $this->validate($request, [
                 'teacher_id' => 'required',
                 'stream_id' => 'required'
-             ]);
-
+            ]);
 
             $stream =  Stream::find($request->stream_id);
 
             if($stream->teacher != NULL){
-                return response()->json(['Stream Already has a teacher'],400);
+                return pozzy_httpForbidden('Stream Already has a teacher');
             }
-
-            $teacher = User::find($request->teacher_id);
 
             $stream->user_id = $request->teacher_id;
             $stream->save();
 
-            return response()->json(['Teacher added to stream'],200);
-
-
+            return pozzy_httpOk($stream);
         } else {
-            return response()->json(['Oops, you have no right to perform this operation'], 401);
+            return pozzy_httpForbidden(['Oops, you have no right to perform this operation']);
         }
     }
     public function get_tests()

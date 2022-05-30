@@ -8,8 +8,7 @@ class Subject extends Model
 {
     protected $guarded = [];
 
-    public function grades(){
-        // return $this->belongsToMany(Grade::class, 'grade_subjects', 'subject_id', 'grade_id');
+    public function grade(){
         return $this->belongsTo(Grade::class);
     }
 
@@ -20,9 +19,19 @@ class Subject extends Model
     public function questions(){
         return $this->hasMany(Question::class);
     }
-    
+
     public function topics(){
         return $this->hasMany(Topic::class);
+    }
+
+    /**
+     * Get the school that owns the Subject
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function school(): BelongsTo
+    {
+        return $this->belongsTo(Subject::class);
     }
 
 }

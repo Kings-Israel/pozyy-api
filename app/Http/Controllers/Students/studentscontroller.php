@@ -122,10 +122,13 @@ class studentscontroller extends Controller
 
     public function getKid($id)
     {
-        $kid = Kid::with(['grade', 'performances'])->where('id', $id)->first();
+        $kid = Kid::where('id', $id)->first();
         if (!$kid) {
             return pozzy_httpNotFound('The student was not found');
         }
+        $kid->load(['grade', 'performances' => function($query) {
+            return Grade::find('performances.grade_id');
+        }]);
         return pozzy_httpOk($kid);
     }
 
@@ -134,15 +137,42 @@ class studentscontroller extends Controller
         $validator = Validator::make($request->all(), [
             'kid_id' => ['required'],
             'grade_id' => ['required'],
-            'performace' => ['required']
+            'student_performance' => ['required']
         ]);
 
         if ($validator->fails()) {
             return pozzy_httpBadRequest($validator->errors());
         }
 
+        $performance = explode(',', $request->student_performance);
+        $student_performance = [];
+
+        for ($i=0; $i < count($performance) ; $i++) {
+            if (!ctype_digit($performance[$i])) {
+                $student_performance[$performance[$i]] = $performance[$i + 1];
+            }
+        }
+
+        // Check if performance for the grade has already been uploaded
+        $recorededPerformances = KidPerformance::where('kid_id'. $request->kid_id)->where('grade_id', $request->grade_id)->first();
+        if ($recorededPerformances) {
+            return pozzy_httpForbidden('Performance this grade have already been recoreded');
+        }
+
         $kidPerformance = new KidPerformance;
         $kidPerformance->kid_id = $request->kid_id;
         $kidPerformance->grade_id = $request->grade_id;
+        $kidPerformance->kid_performance = json_encode($student_performance);
+
+        // Calculate average performance
+        $total_marks = 0;
+        foreach ($student_performance as $subject => $performance) {
+            $total_marks += $performance;
+        }
+
+        $kidPerformance->average_performance = $total_marks;
+        $kidPerformance->save();
+
+        return pozzy_httpOk('Performance saved successfully');
     }
 }

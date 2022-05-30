@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateStreamsTable extends Migration
+class AddSchoolIdToSubjectsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,8 @@ class CreateStreamsTable extends Migration
      */
     public function up()
     {
-        Schema::create('streams', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->foreignId('grade_id')->constrained()->onDelete('cascade');
-            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
+        Schema::table('subjects', function (Blueprint $table) {
             $table->foreignId('school_id')->constrained()->onDelete('cascade');
-            $table->timestamps();
         });
     }
 
@@ -30,6 +25,8 @@ class CreateStreamsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('streams');
+        Schema::table('subjects', function (Blueprint $table) {
+            $table->dropColumn('school_id');
+        });
     }
 }
