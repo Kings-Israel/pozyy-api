@@ -8,6 +8,16 @@ class ClubActivity extends Model
 {
     protected $guarded = ['id'];
     protected $casts = [
-        'created_at' => 'datetime:d-m-Y'
+        'created_at' => 'datetime'
     ];
+
+    /**
+     * Get the club that owns the ClubActivity
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function club()
+    {
+        return $this->belongsTo(Club::class);
+    }
 }

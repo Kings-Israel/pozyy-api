@@ -13,3 +13,4 @@ yarn-error.log
 /public/thumbnails/*
 /public/videos
 /public/logos/*
+/public/uploaded_images

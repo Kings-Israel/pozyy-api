@@ -158,13 +158,18 @@ class schoolcontroller extends Controller
     public function school_data()
     {
         $userRole = Auth::user()->getRoleNames()[0];
+        $school = School::find(Auth::user()->school_id);
         if ($userRole === 'school') {
             $kids = Kid::with(['parent', 'grade'])->where('school_id', auth()->user()->school_id)->get();
-            return pozzy_httpOk($kids);
+            return pozzy_httpOk([$kids, $school]);
         } elseif ($userRole === 'teacher') {
             $stream = Stream::where('user_id', auth()->user()->id)->first();
-            $kids = Kid::with(['parent', 'grade'])->where('school_id', auth()->user()->school_id)->where('grade_id', $stream->grade_id)->get();
-            return pozzy_httpOk($kids);
+            if ($stream) {
+                $kids = Kid::with(['parent', 'grade'])->where('school_id', auth()->user()->school_id)->where('grade_id', $stream->grade_id)->get();
+            } else {
+                $kids = [];
+            }
+            return pozzy_httpOk([$kids, $school]);
         }
     }
 
@@ -204,7 +209,7 @@ class schoolcontroller extends Controller
     public function all_grades()
     {
         $user = Auth::user();
-        $grade = Grade::where('school_id', $user->school_id)->with('streams', 'subjects')->get();
+        $grade = Grade::where('school_id', $user->school_id)->withCount('streams', 'subjects', 'kids')->get();
         return response()->json($grade);
     }
 
@@ -231,7 +236,6 @@ class schoolcontroller extends Controller
         return pozzy_httpOk($streams);
     }
 
-    //teacher
     public function add_teacher(Request $request)
     {
         if(Auth::user()->getRoleNames()[0] == 'school') {
@@ -343,6 +347,12 @@ class schoolcontroller extends Controller
         $sub = Subject::where('grade_id', $request->id)->get();
         return pozzy_httpOk($sub);
     }
+    public function all_teacher_clubs()
+    {
+        $user = Auth::user();
+        $clubs = Club::withCount('kids', 'activities')->where('teacher_id', $user->id)->get();
+        return pozzy_httpOk($clubs);
+    }
     public function add_club_activity(Request $request)
     {
         if(Auth::user()->getRoleNames()[0] == 'teacher') {
@@ -351,7 +361,7 @@ class schoolcontroller extends Controller
             if(!$club) return pozzy_httpBadRequest('Oop, you are not assigned to any club');
             $act = new ClubActivity;
             $act->school_id = $user->school_id;
-            $act->club_id = $club->id;
+            $act->club_id = $request->club_id;
             $act->activity_name = $request->activity_name;
             $act->description = strip_tags($request->description);
             if($request->hasFile('image')) {
@@ -365,12 +375,10 @@ class schoolcontroller extends Controller
         }
         return pozzy_httpForbidden('Oops, you have no right to perform this operation');
     }
-    public function get_clubs_teacher()
+    public function get_club($id)
     {
-        $user = Auth::user();
-        $club = Club::where('teacher_id', $user->id)->first();
-        $act = ClubActivity::where('club_id', $club->id)->get();
-        return pozzy_httpOk($act);
+        $club = Club::with('kids.grade', 'activities')->where('id', $id)->first();
+        return pozzy_httpOk($club);
     }
     public function count_tests()
     {
@@ -420,5 +428,26 @@ class schoolcontroller extends Controller
         $school->load('admin');
 
         return pozzy_httpOk($school);
+    }
+
+    public function getGradeStudents($id)
+    {
+        $students = Kid::with('parent')->where('grade_id', $id)->get();
+        return pozzy_httpOk($students);
+    }
+
+    public function dashBoardData()
+    {
+        $school = School::find(Auth()->user()->school_id);
+
+        // Get Total marks per grade
+        $kids = Kid::where('school_id', $school->id)->get();
+
+        $allGrades = [];
+        $gradesPerformance = [];
+
+        foreach ($kids as $kid) {
+
+        }
     }
 }

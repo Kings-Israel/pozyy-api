@@ -34,8 +34,6 @@ class videocontroller extends Controller
             return response()->json($validate->messages());
         }
 
-        sleep(10);
-
         $user = Auth::user();
         $video = new Video;
         $video->user_id = $user->id;

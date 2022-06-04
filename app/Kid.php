@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Models\Clubs\Club;
 use App\Models\Grade;
 use Illuminate\Database\Eloquent\Model;
 
@@ -52,5 +53,15 @@ class Kid extends Model
     public function performances()
     {
         return $this->hasMany(KidPerformance::class, 'kid_id');
+    }
+
+    /**
+     * The clubs that belong to the Kid
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function clubs()
+    {
+        return $this->belongsToMany(Club::class, 'kid_clubs', '', 'club_id');
     }
 }

@@ -132,6 +132,21 @@ class studentscontroller extends Controller
         return pozzy_httpOk($kid);
     }
 
+    public function assignGrade(Request $request)
+    {
+        $this->validate($request, [
+            'student_id' => ['required'],
+            'grade_id' => ['required']
+        ]);
+
+        $student = Kid::find($request->student_id);
+        $student->update([
+            'grade_id' => $request->grade_id
+        ]);
+
+        return pozzy_httpOk($student);
+    }
+
     public function addKidPerformance(Request $request)
     {
         $validator = Validator::make($request->all(), [

@@ -131,6 +131,7 @@ Route::group(['middleware' => 'jwt.auth'], function ($router) {
     Route::delete('/delete/school/{id}', 'schoolcontroller@delete_school');
     Route::get('/all_schools', 'schoolcontroller@all_schools');
     Route::group(['prefix' => 'school'], function() {
+        Route::get('/dashboard_data', );
         Route::get('/users', 'schoolcontroller@school_data');
         Route::post('/add/class', 'schoolcontroller@add_class');
         Route::delete('/class/{id}/delete', 'schoolcontroller@delete_class');
@@ -138,14 +139,17 @@ Route::group(['middleware' => 'jwt.auth'], function ($router) {
         Route::get('/grades', 'schoolcontroller@all_grades');
         Route::get('/grades/{id}','schoolcontroller@get_grade');
         Route::get('/grades/{id}/streams','schoolcontroller@get_grade_streams');
+        Route::get('/grade/{id}/students', 'schoolcontroller@getGradeStudents');
         Route::get('/teachers','schoolcontroller@all_teachers');
         Route::post('/teacher/subjects','schoolcontroller@all_teacher_subject');
         Route::get('/teacher/streams','schoolcontroller@all_teacher_streams');
+        Route::get('/teacher/clubs','schoolcontroller@all_teacher_clubs');
         Route::post('/add/teacher','schoolcontroller@add_teacher');
         Route::post('/stream/add/teacher','schoolcontroller@add_teacher_to_Stream');
         Route::get('/tests', 'schoolcontroller@get_tests');
         Route::get('/count/tests', 'schoolcontroller@count_tests');
         Route::get('/clubs', 'schoolcontroller@get_clubs');
+        Route::get('/club/{id}', 'schoolcontroller@get_club');
         Route::get('/clubs/teacher', 'schoolcontroller@get_clubs_teacher');
         Route::post('/add/club', 'schoolcontroller@add_club');
         Route::post('/add/club/activity', 'schoolcontroller@add_club_activity');
