@@ -156,7 +156,7 @@ class studentscontroller extends Controller
         ]);
 
         if ($validator->fails()) {
-            return pozzy_httpBadRequest($validator->errors());
+            return pozzy_httpBadRequest($validator->errors()->messages());
         }
 
         $performance = explode(',', $request->student_performance);

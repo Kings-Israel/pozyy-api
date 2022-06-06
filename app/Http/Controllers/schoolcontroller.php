@@ -159,13 +159,16 @@ class schoolcontroller extends Controller
     {
         $userRole = Auth::user()->getRoleNames()[0];
         $school = School::find(Auth::user()->school_id);
+        $kids = [];
         if ($userRole === 'school') {
             $kids = Kid::with(['parent', 'grade'])->where('school_id', auth()->user()->school_id)->get();
             return pozzy_httpOk([$kids, $school]);
         } elseif ($userRole === 'teacher') {
-            $stream = Stream::where('user_id', auth()->user()->id)->first();
-            if ($stream) {
-                $kids = Kid::with(['parent', 'grade'])->where('school_id', auth()->user()->school_id)->where('grade_id', $stream->grade_id)->get();
+            $streams = Stream::where('user_id', auth()->user()->id)->get();
+            if ($streams) {
+                foreach ($streams as $stream) {
+                    array_push($kids, Kid::with(['parent', 'grade'])->where('school_id', auth()->user()->school_id)->where('grade_id', $stream->grade_id)->get());
+                }
             } else {
                 $kids = [];
             }
