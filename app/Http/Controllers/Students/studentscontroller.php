@@ -169,7 +169,7 @@ class studentscontroller extends Controller
         }
 
         // Check if performance for the grade has already been uploaded
-        $recorededPerformances = KidPerformance::where('kid_id'. $request->kid_id)->where('grade_id', $request->grade_id)->first();
+        $recorededPerformances = KidPerformance::where('kid_id', $request->kid_id)->where('grade_id', $request->grade_id)->first();
         if ($recorededPerformances) {
             return pozzy_httpForbidden('Performance this grade have already been recoreded');
         }
