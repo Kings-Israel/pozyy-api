@@ -49,6 +49,24 @@ class studentscontroller extends Controller
 
     public function add_kid(Request $request)
     {
+        $validatedData = Validator::make($request->all(), [
+            'fname' => ['required'],
+            'lname' => ['required'],
+            'age' => ['required'],
+            'gender' => ['required']
+        ], [
+            'fname.required' => 'Please enter the first name',
+            'lname.required' => 'Please enter the last name',
+            'age.required' => 'Please enter the age',
+            'gender.required' => 'Please enter the gender',
+        ]);
+
+        if ($validatedData->fails()){
+            return response()->json([
+                'message' => "invalid data",
+                'errors' =>[$validatedData->messages()]
+            ], 400);
+        }
         if(Auth::user()->getRoleNames()[0] == 'parent') {
 
             $data = [
@@ -56,7 +74,8 @@ class studentscontroller extends Controller
                 'lname' => $request->lname,
                 'gender' => $request->gender,
                 'parent_id' => Auth::user()->id,
-                // 'school_id' => Auth::user()->school_id
+                'school_id' => $request->has('school') && $request->school != NULL ? $request->school : NULL,
+                'grade_id' => $request->has('grade') && $request->grage != NULL ? $request->grade : NULL
             ];
             Kid::create($data);
             return pozzy_httpCreated('Student added successfully');
@@ -101,7 +120,7 @@ class studentscontroller extends Controller
     public function get_kids()
     {
         if(Auth::user()->getRoleNames()[0] == 'parent') {
-            $kids = Kid::where('parent_id', Auth::user()->id)->get();
+            $kids = Kid::with('performances', 'clubs', 'grade', 'school')->where('parent_id', Auth::user()->id)->get();
             return pozzy_httpOk($kids);
         }
         return pozzy_httpForbidden('Oops, you have no right to perform this operation');

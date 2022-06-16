@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Models\Subject;
+use App\Models\Grade;
 use Illuminate\Database\Eloquent\Model;
 
 class School extends Model
@@ -37,5 +38,15 @@ class School extends Model
     public function subjects()
     {
         return $this->hasMany(Subject::class);
+    }
+
+    /**
+     * Get all of the grades for the School
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function grades()
+    {
+        return $this->hasMany(Grade::class);
     }
 }

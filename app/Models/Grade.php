@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Kid;
 use App\KidPerformance;
 use App\Stream;
+use App\School;
 use Illuminate\Database\Eloquent\Model;
 
 class Grade extends Model
@@ -49,5 +50,15 @@ class Grade extends Model
     public function kidsPerformance()
     {
         return $this->hasMany(KidPerformance::class);
+    }
+
+    /**
+     * Get the school that owns the Grade
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function school()
+    {
+        return $this->belongsTo(School::class);
     }
 }

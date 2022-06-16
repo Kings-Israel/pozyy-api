@@ -74,23 +74,14 @@ class UserController extends Controller
 
     public function update(Request $request, $id)
     {
-        // $validatedData =  Validator::make($request->all(),[
-        //     'fname' => 'required',
-        //     'lname' => 'required',
-        //     'username' => 'required|unique:users',
-        //     'email' => 'required|email|unique:users',
-        //     'phone_number' => 'required|unique:users',
-        //     'role_id' => 'required'
-        //     // 'password' => 'required',
-        // ]);
-
+        info($request->all());
         $validatedData =  Validator::make($request->all(),[
             'fname' => 'required',
             'lname' => 'required',
             'username' => 'required',
             'email' => 'required|email',
             'phone_number' => 'required',
-            'role_id' => 'required'
+            // 'role_id' => 'required'
             // 'password' => 'required',
         ]);
 
@@ -111,15 +102,19 @@ class UserController extends Controller
             // $user->password = bcrypt(123456);
         ]);
 
-        $role = Role::where('id', $request->role_id)->first();
 
-        $user->roles()->detach();
-        $user->assignRole($role->name);
-        // $user->revokePermissionTo('edit articles');
-        // $roles = $user->getRoleNames();
+        if ($request->has('role_id')) {
+            $role = Role::where('id', $request->role_id)->first();
+
+            $user->roles()->detach();
+            $user->assignRole($role->name);
+            // $user->revokePermissionTo('edit articles');
+            // $roles = $user->getRoleNames();
+        }
 
         return response()->json([
             "success"=>true,
+            "user" => $user
         ], 200);
     }
 

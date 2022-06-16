@@ -15,7 +15,7 @@ class schoolcontroller extends Controller
 {
     public function all_schools()
     {
-        $school = School::with('admin')->get();
+        $school = School::with('admin', 'grades')->get();
         return pozzy_httpOk($school);
     }
 

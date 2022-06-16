@@ -31,6 +31,13 @@ class AuthController extends Controller
             'email' => 'required|email|unique:users',
             'phone_number' => 'required|unique:users',
             'password' => 'required',
+        ], [
+            'fname.required' => 'The first name is required',
+            'lname.required' => 'The first name is required',
+            'username.required' => 'The first name is required',
+            'email.required' => 'The first name is required',
+            'phone_number.required' => 'The first name is required',
+            'password.required' => 'The first name is required',
         ]);
 
         if ($validatedData->fails()){
