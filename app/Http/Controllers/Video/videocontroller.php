@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers\Video;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use App\Models\Video\{Video,UserVideo,Channel};
-use App\School;
-use Auth;
 use DB;
-use Illuminate\Support\Facades\Validator;
+use Auth;
+use App\School;
+use App\Subchannel;
+use App\Models\Video\Video;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use App\Models\Video\Channel;
+use App\Models\Video\UserVideo;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class videocontroller extends Controller
 {
@@ -39,14 +42,15 @@ class videocontroller extends Controller
         $video->user_id = $user->id;
         $video->school_id = null;
         $video->channel_id = $request->channel;
+        $video->subchannel_id = $request->subchannel;
         $video->age = $request->age;
         $video->subject = $request->subject;
         $video->title = $request->title;
         $video->description = strip_tags($request->description);
-        $video->thumbnail = pathinfo($request->thumbnail->store('thumbnails', 'videos'), PATHINFO_BASENAME);
+        $video->thumbnail = config('services.app_url.url').'/storage/videos/thumbnails/'.pathinfo($request->thumbnail->store('thumbnails', 'videos'), PATHINFO_BASENAME);
         $video->video_url = pozzy_videoCompress($request->file('video'), $user);
         // $video->video_url = pathinfo($request->video->store('video', 'videos'), PATHINFO_BASENAME);
-        $video->subchannel = $request->subchannel;
+        $video->subchannel_id = $request->has('subchannel') && $request->subchannel != NULL ? $request->subchannel : NULL;
         $video->save();
         return pozzy_httpCreated($video);
     }
@@ -121,7 +125,7 @@ class videocontroller extends Controller
             $video->title = $request->title;
             $video->description = strip_tags($request->description);
             $video->video_url = pozzy_videoCompress($request->file('video'), $user);
-            $video->subchannel = $request->subchannel;
+            $video->subchannel_id = $request->has('subchannel') && $request->subchannel != NULL ? $request->subchannel : NULL;
             $video->save();
             $data = [
                 'user_id' => $user->id,
@@ -198,18 +202,26 @@ class videocontroller extends Controller
         $video->delete();
         return pozzy_httpOk('Video deleted successfully');
     }
+    public function show_channel($id)
+    {
+        $channel = Channel::with('videos.subchannel', 'subchannels.videos')->where('id', $id)->first();
+
+        return response()->json($channel, 200);
+    }
     public function add_channel(Request $request)
     {
         $rules = [
-            'name' => 'required',
+            'name' => ['required', 'unique:channels'],
             'description' => 'required',
+            'type' => ['required'],
             'thumbnail' => 'required'
         ];
 
         $messages = [
             'name.required' => 'Please fill in the name',
             'description.required' => 'Please enter a description',
-            'thumbnail.required' => 'Please upload an image for the thumbnail'
+            'type.required' => 'Please select the audience type',
+            'thumbnail.required' => 'Please upload an image for the thumbnail',
         ];
 
         $validate = Validator::make($request->all(), $rules, $messages);
@@ -223,14 +235,35 @@ class videocontroller extends Controller
             'description' => strip_tags($request->description),
             'school_id' => Auth::user()->school_id,
             'user_id' => Auth::user()->id,
+            'type' => $request->type,
+            'is_guide' => $request->has('is_guide') && $request->is_guide == true ? true : false,
             'thumbnail' => pathinfo($request->thumbnail->store('thumbnails', 'channel'), PATHINFO_BASENAME),
-            'subchannels' => json_encode($request->subchannels),
         ];
 
 
         $channel = Channel::create($data);
 
-        return pozzy_httpOk($channel->loadCount('videos'));
+        return pozzy_httpOk($channel->loadCount('videos', 'subchannels'));
+    }
+    public function add_subchannel(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'channel_id' => ['required'],
+            'name' => ['required'],
+            'thumbnail' => ['required', 'mimes:png,jpg,jpeg'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->messages(), 422);
+        }
+
+        $subchannel = Subchannel::create([
+            'channel_id' => $request->channel_id,
+            'name' => $request->name,
+            'thumbnail_url' => config('services.app_url.url').'/storage/channel/subchannel/thumbnail/'.pathinfo($request->thumbnail->store('subchannel/thumbnail', 'channel'), PATHINFO_BASENAME),
+        ]);
+
+        return response()->json(['message' => 'Subchannel created successfullly', 'data' => $subchannel], 201);
     }
     public function update_channel(Request $request)
     {
@@ -257,7 +290,6 @@ class videocontroller extends Controller
         $channel->update([
             'name' => $request->name,
             'description' => strip_tags($request->description),
-            'subchannels' => json_encode($request->subchannels),
         ]);
 
         if($request->hasFile('thumbnail')) {
@@ -267,12 +299,38 @@ class videocontroller extends Controller
             ]);
         }
 
-        $channels = Channel::withCount('videos')->get();
+        $channels = Channel::withCount('videos', 'subchannels')->get();
         return pozzy_httpOk($channels);
+    }
+    public function update_subchannel(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => ['required'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->messages(), 422);
+        }
+
+        $subchannel = Subchannel::find($id);
+        $subchannel->update([
+            'name' => $request->name,
+        ]);
+
+        if ($request->hasFile('thumbnail') && $request->thumbnail != NULL) {
+            Storage::disk('videos')->delete('subchannel/thumbnail/'.$subchannel->thumbnail);
+            $subchannel->update([
+                'thumbnail_url' => config('services.app_url.url').'/storage/channel/subchannel/thumbnail/'.pathinfo($request->thumbnail->store('subchannel/thumbnail', 'channel'), PATHINFO_BASENAME),
+            ]);
+        }
+
+        return response()->json('Subchannel updated', 200);
+
+        return response()->json(['message' => 'Subchannel created successfullly', 'data' => $subchannel], 201);
     }
     public function all_channel()
     {
-        $data = Channel::withCount('videos')->get();
+        $data = Channel::with('videos', 'subchannels')->get();
         return pozzy_httpOk($data);
     }
     public function channel_video(Request $request)
@@ -291,15 +349,14 @@ class videocontroller extends Controller
             return pozzy_httpOk($data);
         }
     }
-
     public function subchannel_videos(Request $request)
     {
         $this->validate($request, [
             'channel_id' => 'required',
-            'subchannel' => 'required'
+            'subchannel_id' => 'required'
         ]);
 
-        $data = Video::where('channel_id', $request->channel_id)->where('subchannel', $request->subchannel)->get();
+        $data = Video::where('channel_id', $request->channel_id)->where('subchannel_id', $request->subchannel_id)->get();
 
         return pozzy_httpOk($data);
     }

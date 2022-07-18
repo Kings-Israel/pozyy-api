@@ -20,6 +20,8 @@ class CreateChannelsTable extends Migration
             $table->bigInteger('school_id')->nullable();
             $table->bigInteger('user_id')->nullable();
             $table->boolean('suspend')->default(false);
+            $table->enum('type', ['parent', 'student'])->default('parent');
+            $table->boolean('is_guide')->default(false);
             $table->timestamps();
         });
     }

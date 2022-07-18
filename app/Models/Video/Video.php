@@ -2,16 +2,19 @@
 
 namespace App\Models\Video;
 
+use App\User;
+use App\School;
+use App\Subchannel;
+use App\Models\Video\Channel;
 use Illuminate\Database\Eloquent\Model;
-use App\{School, User,Stream};
-use App\Models\{Subject, Grade};
+// use App\{School, User, Stream};
+// use App\Models\{Subject, Grade};
 
 class Video extends Model
 {
     protected $guarded = ['id'];
     protected $casts = [
         'created_at' => 'datetime',
-        'subchannels' => 'array'
     ];
     public function user() {
         return $this->belongsTo(User::class);
@@ -25,14 +28,14 @@ class Video extends Model
     {
         return $this->belongsTo(Channel::class);
     }
-    // public function grade() {
-    //     return $this->belongsTo(Grade::class);
-    // }
-    // public function subject() {
-    //     return $this->belongsTo(Subject::class);
-    // }
-    public function stream() {
-        return $this->belongsTo(Stream::class);
+    /**
+     * Get the subchannel that owns the Video
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function subchannel()
+    {
+        return $this->belongsTo(Subchannel::class);
     }
 
     public function school()

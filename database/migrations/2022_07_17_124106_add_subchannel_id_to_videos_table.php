@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddSuchannelsToChannelsTable extends Migration
+class AddSubchannelIdToVideosTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddSuchannelsToChannelsTable extends Migration
      */
     public function up()
     {
-        Schema::table('channels', function (Blueprint $table) {
-            $table->json('subchannels')->nullable();
+        Schema::table('videos', function (Blueprint $table) {
+            $table->foreignId('subchannel_id')->nullable()->references('id')->on('subchannels')->onDelete('set null');
         });
     }
 
@@ -25,8 +25,8 @@ class AddSuchannelsToChannelsTable extends Migration
      */
     public function down()
     {
-        Schema::table('channels', function (Blueprint $table) {
-            $table->dropColumn('subchannels');
+        Schema::table('videos', function (Blueprint $table) {
+            $table->dropColumn('subchannel_id');
         });
     }
 }
