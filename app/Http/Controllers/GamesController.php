@@ -159,9 +159,9 @@ class GamesController extends Controller
         $optionsArray = [];
         for ($i=0; $i < count($request->options); $i++) {
             if ($request->correct === $request->options[$i]) {
-                array_push($optionsArray, [$request->options[$i] => true]);
+                array_push($optionsArray, ['text' => $request->options[$i], 'isCorrect' => true]);
             } else {
-                array_push($optionsArray, [$request->options[$i] => false]);
+                array_push($optionsArray, ['text' => $request->options[$i], 'isCorrect' => false]);
             }
         }
         $question->options = $optionsArray;
