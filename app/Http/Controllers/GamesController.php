@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\GamesLeaderboard;
 use App\Kid;
 use App\School;
-use App\SpotDifference;
 use App\Trivia;
+use Carbon\Carbon;
+use App\TwoPicsGame;
+use App\SpotDifference;
 use App\TriviaCategory;
 use App\TriviaQuestion;
-use App\TwoPicsGame;
+use App\GamesLeaderboard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -81,7 +83,8 @@ class GamesController extends Controller
             'title' => ['required'],
             'description' => ['required'],
             'image' => ['required', 'mimes:jpg,png,jpeg'],
-            'start_time' => ['required']
+            'start_time' => ['required'],
+            'end_time' => ['required'],
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -97,6 +100,7 @@ class GamesController extends Controller
             'description' => strip_tags($request->description),
             'imagePath' => config('services.app_url.url').'/storage/games/trivia/trivia/'.pathinfo($request->image->store('trivia/trivia', 'games'), PATHINFO_BASENAME),
             'start_time' => $request->start_time,
+            'end_time' => Carbon::parse($request->start_time)->addMinutes($request->end_time),
         ]);
 
         $trivia->load('triviaCategory')->loadCount('triviaQuestions');
@@ -126,6 +130,7 @@ class GamesController extends Controller
         $trivia->trivia_category_id = $request->category_id;
         $trivia->age_group = $request->age_group;
         $trivia->start_time = $request->start_time;
+        $trivia->end_time = Carbon::parse($request->start_time)->addMinutes($request->end_time);
 
         if ($request->hasFile('image')) {
             $this->deleteFile($trivia->imagePath, 'trivia/trivia');
@@ -254,7 +259,8 @@ class GamesController extends Controller
             'image_two' => ['required', 'mimes:jpg,png,jpeg'],
             'answer' => ['required'],
             'age_group' => ['required'],
-            'start_time' => ['required']
+            'start_time' => ['required'],
+            'end_time' => ['required'],
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -276,6 +282,8 @@ class GamesController extends Controller
         $twoPics->duration = $request->duration;
         $twoPics->age_group = $request->age_group;
         $twoPics->start_time = $request->start_time;
+        $twoPics->start_time = $request->start_time;
+        $twoPics->end_time = Carbon::parse($request->start_time)->addMinutes($request->end_time);
 
         $twoPics->pictureOne = config('services.app_url.url').'/storage/games/twopics/'.pathinfo($request->image_one->store('twopics', 'games'), PATHINFO_BASENAME);
         $twoPics->pictureTwo = config('services.app_url.url').'/storage/games/twopics/'.pathinfo($request->image_two->store('twopics', 'games'), PATHINFO_BASENAME);
@@ -303,6 +311,7 @@ class GamesController extends Controller
             'answer' => ['required'],
             'age_group' => ['required'],
             'start_time' => ['required'],
+            'end_time' => ['required'],
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -318,6 +327,7 @@ class GamesController extends Controller
         $game->duration = $request->duration;
         $game->age_group = $request->age_group;
         $game->start_time = $request->start_time;
+        $game->end_time = Carbon::parse($request->start_time)->addMinutes($request->end_time);
 
         if ($request->hasFile('image_one')) {
             $this->deleteFile($game->pictureOne, 'twopics');
@@ -404,6 +414,7 @@ class GamesController extends Controller
             'differences' => ['required'],
             'age_group' => ['required'],
             'start_time' => ['required'],
+            'end_time' => ['required']
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -417,6 +428,7 @@ class GamesController extends Controller
         $game->differences = collect(explode(',', strip_tags($request->differences)))->map(fn ($difference) => trim($difference));
         $game->age_group = $request->age_group;
         $game->start_time = $request->start_time;
+        $game->end_time = Carbon::parse($request->start_time)->addMinutes($request->end_time);
 
         if ($request->duration != '' || $request->duration != null) {
             $game->duration = $request->duration;
@@ -436,6 +448,7 @@ class GamesController extends Controller
             'differences' => ['required'],
             'age_group' => ['required'],
             'start_time' => ['required'],
+            'end_time' => ['required'],
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -449,6 +462,7 @@ class GamesController extends Controller
         $game->differences = collect(explode(',', strip_tags($request->differences)))->map(fn ($difference) => trim($difference));
         $game->age_group = $request->age_group;
         $game->start_time = $request->start_time;
+        $game->end_time = Carbon::parse($request->start_time)->addMinutes($request->end_time);
 
         if ($request->duration != '' || $request->duration != null) {
             $game->duration = $request->duration;
