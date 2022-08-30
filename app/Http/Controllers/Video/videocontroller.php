@@ -42,7 +42,6 @@ class videocontroller extends Controller
         $video->user_id = $user->id;
         $video->school_id = null;
         $video->channel_id = $request->channel;
-        $video->subchannel_id = $request->subchannel;
         $video->age = $request->age;
         $video->subject = $request->subject;
         $video->title = $request->title;
@@ -50,7 +49,7 @@ class videocontroller extends Controller
         $video->thumbnail = config('services.app_url.url').'/storage/videos/thumbnails/'.pathinfo($request->thumbnail->store('thumbnails', 'videos'), PATHINFO_BASENAME);
         $video->video_url = pozzy_videoCompress($request->file('video'), $user);
         // $video->video_url = pathinfo($request->video->store('video', 'videos'), PATHINFO_BASENAME);
-        $video->subchannel_id = $request->has('subchannel') && $request->subchannel != NULL ? $request->subchannel : NULL;
+        $video->subchannel_id = $request->has('subchannel') && $request->subchannel != 'null' ? $request->subchannel : NULL;
         $video->save();
         return pozzy_httpCreated($video);
     }
