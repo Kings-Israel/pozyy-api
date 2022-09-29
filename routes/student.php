@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
 
 Route::group(['prefix' => 'student', 'middleware' => 'jwt.auth'], function() {
     Route::post('/school/code/verify', 'Students\studentscontroller@verifyCode');
@@ -18,4 +19,6 @@ Route::group(['prefix' => 'parent', 'middleware' => 'jwt.auth'], function() {
     Route::get('/students','Students\studentscontroller@get_kids');
     Route::post('/edit/student/{id}', 'Students\studentscontroller@edit_kid');
     Route::post('/student/login', 'Students\studentscontroller@choose_between_student');
+
+    Route::get('/account/delete', [UserController::class, 'deleteAccount']);
 });

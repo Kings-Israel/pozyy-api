@@ -168,8 +168,29 @@ class UserController extends Controller
             return redirect()->back()->with('danger', 'Request declined, user not found.');
         }
     }
+
     public function total_users() {
         $user = User::get()->count();
         return response()->json($user - 2);
+    }
+
+    public function deleteAccount()
+    {
+        if (!auth()->check()) {
+            return response()->json(['message' => 'Please login to perform this action'], 200);
+        }
+
+        // Check user role
+        if (auth()->user()->getRoleNames()[0] != 'parent') {
+            return response()->json(['message' => 'You do not have rights to perform this action'], 200);
+        }
+
+        $kids = auth()->user()->kids;
+
+        $kids->each(fn ($kid) => $kid->delete());
+
+        auth()->user()->delete();
+
+        return response()->json(['message' => 'User data deleted successfully'], 200);
     }
 }

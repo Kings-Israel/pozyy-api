@@ -107,4 +107,14 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(UserShopItems::class);
     }
+
+    /**
+     * Get all of the kids for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function kids()
+    {
+        return $this->hasMany(Kid::class, 'parent_id', 'id');
+    }
 }
