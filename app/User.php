@@ -117,4 +117,14 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(Kid::class, 'parent_id', 'id');
     }
+
+    /**
+     * Get all of the gameNights for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function gameNights()
+    {
+        return $this->hasMany(GameNight::class);
+    }
 }

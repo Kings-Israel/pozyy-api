@@ -22,4 +22,14 @@ class SpotDifference extends Model
         $exists = DB::table('users_games_played')->where('user_id', $user->id)->where('spot_difference_id', $this->id)->first();
         return $exists;
     }
+
+    /**
+     * Get the gameNight that owns the Trivia
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+     public function gameNight()
+    {
+        return $this->belongsTo(GameNight::class);
+    }
 }

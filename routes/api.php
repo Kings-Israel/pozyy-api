@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\GamesController;
+use App\Http\Controllers\GameNightController;
 
 Route::resource('/blogs', 'BlogController');
 Route::post('/blogs/update', 'BlogController@updateBlog');
@@ -36,7 +38,18 @@ Route::group([
     // Route::post('school_register', 'AuthController@school_register');
 });
 
+Route::post('/game-night/payment/callback', [GameNightController::class, 'gameNightPaymentCallback'])->name('game-night.payment.callback');
+
 Route::group(['middleware' => 'jwt.auth'], function ($router) {
+    // Admin Game Night
+    Route::get('/admin/game-nights', [GameNightController::class, 'index']);
+    Route::post('/game-night/create', [GameNightController::class, 'store']);
+    Route::post('/game-night/{id}/update', [GameNightController::class, 'update']);
+    Route::delete('/game-night/{id}/delete', [GameNightController::class, 'destroy']);
+
+    Route::post('/game/to/game-night', [GamesController::class, 'addToGameNight']);
+    Route::post('/game/from/game-night', [GamesController::class, 'removeFromGameNight']);
+
     // Trivia
     Route::get('/trivias', 'GamesController@getAllTrivias');
     Route::get('/trivia/categories', 'GamesController@getTriviaCategories');
@@ -50,6 +63,12 @@ Route::group(['middleware' => 'jwt.auth'], function ($router) {
 
     Route::get('/trivia/{id}/question/new', 'GamesController@getNewTriviaQuestion');
     Route::post('/trivia/save', 'GamesController@saveSolvedTriviaQuestion');
+
+    // User Game Night
+    Route::get('/game-nights', [GameNightController::class, 'getGameNights']);
+    Route::get('/game-night/{id}/games', [GameNightController::class, 'getGameNightGames']);
+
+    Route::post('/game-night/payment', [GameNightController::class, 'gameNightPayment']);
 
     // Two Pictures One Word
     Route::get('/twopicsgames', 'GamesController@getPicsGames');

@@ -27,4 +27,14 @@ class Trivia extends Model
     {
         return $this->hasMany(TriviaQuestion::class);
     }
+
+    /**
+     * Get the gameNight that owns the Trivia
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function gameNight()
+    {
+        return $this->belongsTo(GameNight::class);
+    }
 }

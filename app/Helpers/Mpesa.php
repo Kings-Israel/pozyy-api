@@ -74,7 +74,8 @@ class Mpesa
          $curl_response = curl_exec($curl);
          $access_token = json_decode($curl_response);
          return $access_token->access_token;
-      } catch (\Exception $e) {
+        } catch (\Exception $e) {
+          info($e);
          return false;
       }
    }

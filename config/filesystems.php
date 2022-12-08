@@ -117,7 +117,13 @@ return [
             'root' => storage_path('app/public/mobile-media'),
             'url' => env('APP_URL').'/storage/mobile-media',
             'visibility' => 'public'
-        ]
+        ],
+        'game-night' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/game-night'),
+            'url' => env('APP_URL').'/storage/game-night',
+            'visibility' => 'public'
+        ],
     ],
 
     /*

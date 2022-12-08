@@ -101,7 +101,7 @@ class ShopItemController extends Controller
             return ShopItem::find($item);
         });
 
-        return response()->json($items, 200);
+        // return response()->json($items, 200);
 
         $phone_number = Auth::user()->phone_number;
         if (strlen($request->phone_number) == 9) {

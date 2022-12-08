@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Kid;
 use App\School;
 use App\Trivia;
+use App\GameNight;
 use Carbon\Carbon;
 use App\TwoPicsGame;
 use App\SpotDifference;
@@ -28,7 +29,7 @@ class GamesController extends Controller
 
     public function getAllTrivias()
     {
-        $trivias = Trivia::with('triviaCategory')->withCount('triviaQuestions')->get();
+        $trivias = Trivia::with(['triviaCategory', 'gameNight'])->withCount('triviaQuestions')->get();
 
         return pozzy_httpOk($trivias);
     }
@@ -103,7 +104,7 @@ class GamesController extends Controller
             'end_time' => Carbon::parse($request->start_time)->addMinutes($request->end_time),
         ]);
 
-        $trivia->load('triviaCategory')->loadCount('triviaQuestions');
+        $trivia->load('triviaCategory')->loadCount('triviaQuestions')->load('gameNight');
 
         return pozzy_httpCreated($trivia);
     }
@@ -139,7 +140,7 @@ class GamesController extends Controller
 
         $trivia->save();
 
-        $trivia->load('triviaCategory')->load('triviaQuestions');
+        $trivia->load('triviaCategory')->load('triviaQuestions')->load('gaemNight');
 
         return pozzy_httpOk($trivia);
     }
@@ -247,7 +248,7 @@ class GamesController extends Controller
 
     public function getPicsGames()
     {
-        $picsGames = TwoPicsGame::all();
+        $picsGames = TwoPicsGame::with('gameNight')->get();
 
         return pozzy_httpOk($picsGames);
     }
@@ -401,7 +402,7 @@ class GamesController extends Controller
 
     public function getSpotDifferenceGames()
     {
-        $games = SpotDifference::all();
+        $games = SpotDifference::with('gameNight')->get();
 
         return pozzy_httpOk($games);
     }
@@ -589,5 +590,101 @@ class GamesController extends Controller
         });
 
         return pozzy_httpOk($kids->load('leaderboard'));
+    }
+
+    public function addToGameNight(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'game_type' => 'required',
+            'game_id' => 'required',
+            'game_night_id' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->messages(), 422);
+        }
+
+        $game_night = GameNight::find($request->game_night_id);
+        $games = NULL;
+
+        switch ($request->game_type) {
+            case 'Trivia':
+                $trivia = Trivia::find($request->game_id);
+                $duration = Carbon::parse($trivia->start_time)->diffInMinutes(Carbon::parse($trivia->end_time));
+                $trivia->update([
+                    'game_night_id' => $request->game_night_id,
+                ]);
+                $games = Trivia::with(['triviaCategory', 'gameNight'])->get();
+                break;
+            case 'Spot Difference':
+                $spot_difference = SpotDifference::find($request->game_id);
+                $duration = Carbon::parse($spot_difference->start_time)->diffInMinutes(Carbon::parse($spot_difference->end_time));
+                $spot_difference->update([
+                    'game_night_id' => $request->game_night_id,
+                ]);
+                $games = SpotDifference::with('gameNight')->get();
+                break;
+            case 'Two Pics Game':
+                $two_pics = TwoPicsGame::find($request->game_id);
+                $duration = Carbon::parse($two_pics->start_time)->diffInMinutes(Carbon::parse($two_pics->end_time));
+                $two_pics->update([
+                    'game_night_id' => $request->game_night_id,
+                ]);
+                $games = TwoPicsGame::with('gameNight')->get();
+                break;
+
+            default:
+                return pozzy_httpNotFound('Game Not Found');
+                break;
+        }
+
+        $game_night->update([
+            'duration' => $game_night->duration + $duration,
+        ]);
+
+        return response()->json(['message' => 'Game added to game night', 'data' => $games], 200);
+    }
+
+    public function removeFromGameNight(Request $request)
+    {
+        $game_night = GameNight::find($request->game_night_id);
+        $games = NULL;
+
+        switch ($request->game_type) {
+            case 'Trivia':
+                $trivia = Trivia::find($request->game_id);
+                $duration = Carbon::parse($trivia->start_time)->diffInMinutes(Carbon::parse($trivia->end_time));
+                $games = Trivia::all();
+                $trivia->update([
+                    'game_night_id' => NULL,
+                ]);
+                break;
+            case 'Spot Difference':
+                $spot_difference = SpotDifference::find($request->game_id);
+                $duration = Carbon::parse($spot_difference->start_time)->diffInMinutes(Carbon::parse($spot_difference->end_time));
+                $games = SpotDifference::all();
+                $spot_difference->update([
+                    'game_night_id' => NULL,
+                ]);
+                break;
+            case 'Two Pics':
+                $two_pics = TwoPicsGame::find($request->game_id);
+                $duration = Carbon::parse($two_pics->start_time)->diffInMinutes(Carbon::parse($two_pics->end_time));
+                $games = TwoPicsGame::all();
+                $two_pics->update([
+                    'game_night_id' => NULL,
+                ]);
+                break;
+
+            default:
+                return pozzy_httpNotFound('Game Not Found');
+                break;
+        }
+
+        $game_night->update([
+            'duration' => $game_night->duration - $duration,
+        ]);
+
+        return response()->json(['message' => 'Game removed from game night', 'data' => $games], 200);
     }
 }

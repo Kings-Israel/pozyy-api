@@ -71,7 +71,7 @@ class HomeController extends Controller
     {
         $months = [];
         $totalUsers = [];
-        $days = [0, 29, 59, 89, 119, 149, 179];
+        $days = [0, 29, 49, 69, 89, 109, 129, 149, 169, 189];
         foreach ($days as $day) {
             array_push($months, Carbon::now()->subDays($day));
         }
