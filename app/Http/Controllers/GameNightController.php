@@ -8,6 +8,7 @@ use App\GameNight;
 use Carbon\Carbon;
 use App\TwoPicsGame;
 use App\MpesaPayment;
+use App\UserGameNight;
 use App\SpotDifference;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
