@@ -213,7 +213,7 @@ class GameNightController extends Controller
 
             UserGameNight::create([
                 'user_id' => $mpesaPayment->user_id,
-                'game_night' => $mpesaPayment->mpesa_payable_id
+                'game_night_id' => $mpesaPayment->mpesa_payable_id
             ]);
         }
     }
