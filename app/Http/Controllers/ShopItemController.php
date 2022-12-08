@@ -120,7 +120,7 @@ class ShopItemController extends Controller
             'Purchase of Shop Item'
         );
 
-        if ($results['response_code'] === 0) {
+        if ($results['response_code'] == 0) {
             $shop_item = ShopItem::find($request->item_id);
             $mpesa_payable_type = ShopItem::class;
             MpesaPayment::create([

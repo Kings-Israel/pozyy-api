@@ -151,6 +151,12 @@ class GameNightController extends Controller
             return response()->json($validator->messages(), 422);
         }
 
+        $game_night = GameNight::find($request->game_night_id);
+
+        if(!$game_night) {
+            return response()->json(['message' => 'Game night not found'], 400);
+        }
+
         $phone_number = Auth::user()->phone_number;
         if (strlen($request->phone_number) == 9) {
             $phone_number = '254'.$phone_number;
@@ -158,7 +164,6 @@ class GameNightController extends Controller
             $phone_number = '254'.substr($phone_number, -9);
         }
 
-        $game_night = GameNight::find($request->game_night_id);
         $account_number = Str::upper(Str::random(3)).time().Str::upper(Str::random(3));
 
         $transaction = new MpesaPaymentController;
@@ -171,7 +176,7 @@ class GameNightController extends Controller
             'Game Night Payment'
         );
 
-        if ($results['response_code'] === 0) {
+        if ($results['response_code'] == 0) {
             $mpesa_payable_type = GameNight::class;
             MpesaPayment::create([
                 'user_id' => Auth::user()->id,
