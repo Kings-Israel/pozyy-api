@@ -139,6 +139,12 @@ class GameNightController extends Controller
     {
         $game_night = GameNight::with('triviaGames', 'twoPicsGames', 'spotDifferencesGames')->where('id', $id)->first();
 
+        if ($game_night->userCanPlay()) {
+            $game_night['can_play'] = true;
+        } else {
+            $game_night['can_play'] = false;
+        }
+
         return response()->json(['message' => '', 'data' => $game_night], 200);
     }
 
@@ -217,5 +223,4 @@ class GameNightController extends Controller
             ]);
         }
     }
-
 }

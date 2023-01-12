@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GamesController;
+use App\Http\Controllers\PozyyTvController;
 use App\Http\Controllers\GameNightController;
 
 Route::resource('/blogs', 'BlogController');
@@ -184,6 +185,15 @@ Route::group(['middleware' => 'jwt.auth'], function ($router) {
         Route::post('/filter/questions', 'TeachersController@filter_questions');
         Route::post('/create/exam', 'TeachersController@create_exam');
         Route::get('/tests', 'TeachersController@get_tests');
+    });
+
+    // Pozyy Tv
+    Route::prefix('pozyy/tv')->group(function () {
+        Route::get('/all', [PozyyTvController::class, 'getVideos']);
+        Route::get('/{id}', [PozyyTvController::class, 'getVideo']);
+        Route::post('/add', [PozyyTvController::class, 'adminAddVideo']);
+        Route::post('/{id}/update', [PozyyTvController::class, 'adminUpdateVideo']);
+        Route::delete('/{id}/delete', [PozyyTvController::class, 'delete']);
     });
 });
 

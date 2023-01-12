@@ -78,7 +78,7 @@ class AuthController extends Controller
     }
 
     public function parent_register(Request $request) {
-       $validatedData =  Validator::make($request->all(),[
+       $validatedData =  Validator::make($request->all(), [
             'fname' => 'required',
             'lname' => 'required',
             'username' => 'required',
@@ -91,7 +91,7 @@ class AuthController extends Controller
             return response()->json([
                 'message' => "invalid data",
                 'errors' =>[$validatedData->messages()]
-            ], 400);
+            ], 422);
         }
 
         $par = new User;
