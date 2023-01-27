@@ -10,6 +10,7 @@ use App\TwoPicsGame;
 use App\MpesaPayment;
 use App\UserGameNight;
 use App\SpotDifference;
+use App\GameNightCategory;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -22,7 +23,7 @@ class GameNightController extends Controller
 {
     public function index()
     {
-        $game_nights = GameNight::with('triviaGames', 'twoPicsGames', 'spotDifferencesGames')->get();
+        $game_nights = GameNight::with('triviaGames', 'twoPicsGames', 'spotDifferencesGames', 'category')->get();
 
         return pozzy_httpOk($game_nights);
     }
@@ -34,6 +35,7 @@ class GameNightController extends Controller
             'start_date' => 'required|date',
             'start_time' => 'required',
             'price' => 'required',
+            'category' => 'category_id',
             'poster' => 'required|mimes:png,jpg,jpeg',
         ]);
 
@@ -56,6 +58,7 @@ class GameNightController extends Controller
             'start_time' => $request->start_time,
             'price' => $request->price,
             'poster' => config('app.url').'/storage/game-night/poster/'.$img->basename,
+            'category_id' => $request->category_id
         ]);
 
         return response()->json(['message' => 'Game Night added successfully', 'data' => $game_night], 201);
@@ -68,6 +71,7 @@ class GameNightController extends Controller
             'start_date' => 'required|date',
             'start_time' => 'required',
             'price' => 'required',
+            'category_id' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -93,9 +97,10 @@ class GameNightController extends Controller
             'start_time' => $request->start_time,
             'price' => $request->price,
             'poster' => $request->hasFile('poster') ? config('app.url').'/storage/game-night/poster/'.$img->basename : $game_night->poster,
+            'category_id' => $request->category_id,
         ]);
 
-        $game_nights = GameNight::with('triviaGames', 'twoPicsGames', 'spotDifferencesGames')->get();
+        $game_nights = GameNight::with('triviaGames', 'twoPicsGames', 'spotDifferencesGames', 'category')->get();
 
         return response()->json(['message' => 'Game Night updated', 'data' => $game_nights]);
     }
@@ -122,7 +127,7 @@ class GameNightController extends Controller
 
     public function getGameNights()
     {
-        $game_nights = GameNight::with('triviaGames', 'twoPicsGames', 'spotDifferencesGames')->get();
+        $game_nights = GameNight::with('triviaGames', 'twoPicsGames', 'spotDifferencesGames', 'category')->get();
 
         foreach ($game_nights as $key => $game_night) {
             if ($game_night->userCanPlay()) {
@@ -137,7 +142,7 @@ class GameNightController extends Controller
 
     public function getGameNightGames($id)
     {
-        $game_night = GameNight::with('triviaGames', 'twoPicsGames', 'spotDifferencesGames')->where('id', $id)->first();
+        $game_night = GameNight::with('triviaGames', 'twoPicsGames', 'spotDifferencesGames', 'category')->where('id', $id)->first();
 
         if ($game_night->userCanPlay()) {
             $game_night['can_play'] = true;
@@ -222,5 +227,42 @@ class GameNightController extends Controller
                 'game_night_id' => $mpesaPayment->mpesa_payable_id
             ]);
         }
+    }
+
+    public function getCategories()
+    {
+        $categories = GameNightCategory::all();
+
+        return response()->json(['data' => $categories]);
+    }
+
+    public function getGameDays()
+    {
+        $game_nights = GameNight::with('triviaGames', 'twoPicsGames', 'spotDifferencesGames', 'category')->where('category_id', 1)->get();
+
+        foreach ($game_nights as $key => $game_night) {
+            if ($game_night->userCanPlay()) {
+                $game_night['can_play'] = true;
+            } else {
+                $game_night['can_play'] = false;
+            }
+        }
+
+        return response()->json(['message' => '', 'data' => $game_nights], 200);
+    }
+
+    public function getCreatorsChallenges()
+    {
+        $game_nights = GameNight::with('triviaGames', 'twoPicsGames', 'spotDifferencesGames', 'category')->where('category_id', 2)->get();
+
+        foreach ($game_nights as $key => $game_night) {
+            if ($game_night->userCanPlay()) {
+                $game_night['can_play'] = true;
+            } else {
+                $game_night['can_play'] = false;
+            }
+        }
+
+        return response()->json(['message' => '', 'data' => $game_nights], 200);
     }
 }

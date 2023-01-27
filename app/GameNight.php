@@ -14,6 +14,16 @@ class GameNight extends Model
     protected $guarded = [];
 
     /**
+     * Get the category that owns the GameNight
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function category()
+    {
+        return $this->belongsTo(GameNightCategory::class);
+    }
+
+    /**
      * Get all of the users for the GameNight
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough

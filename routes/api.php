@@ -41,6 +41,9 @@ Route::group([
 
 Route::post('/game-night/payment/callback', [GameNightController::class, 'gameNightPaymentCallback'])->name('game-night.payment.callback');
 
+Route::get('/game-night/game-days', [GameNightController::class, 'getGameDays']);
+Route::get('/game-night/creators-challenges', [GameNightController::class, 'getCreatorsChallenges']);
+
 Route::group(['middleware' => 'jwt.auth'], function ($router) {
     // Admin Game Night
     Route::get('/admin/game-nights', [GameNightController::class, 'index']);
@@ -67,6 +70,8 @@ Route::group(['middleware' => 'jwt.auth'], function ($router) {
 
     // User Game Night
     Route::get('/game-nights', [GameNightController::class, 'getGameNights']);
+    Route::get('/game-night/categories', [GameNightController::class, 'getCategories']);
+
     Route::get('/game-night/{id}/games', [GameNightController::class, 'getGameNightGames']);
 
     Route::post('/game-night/payment', [GameNightController::class, 'gameNightPayment']);
