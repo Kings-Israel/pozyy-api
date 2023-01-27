@@ -35,7 +35,7 @@ class GameNightController extends Controller
             'start_date' => 'required|date',
             'start_time' => 'required',
             'price' => 'required',
-            'category' => 'category_id',
+            'category_id' => 'required',
             'poster' => 'required|mimes:png,jpg,jpeg',
         ]);
 
@@ -61,7 +61,7 @@ class GameNightController extends Controller
             'category_id' => $request->category_id
         ]);
 
-        return response()->json(['message' => 'Game Night added successfully', 'data' => $game_night], 201);
+        return response()->json(['message' => 'Game Night added successfully', 'data' => $game_night->load('category')], 201);
     }
 
     public function update(Request $request, $id)
