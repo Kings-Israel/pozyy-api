@@ -238,7 +238,7 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'user' => ['fname' => $this->guard()->user()->fname, 'lname' => $this->guard()->user()->lname],
+            'user' => $this->guard()->user(),
             'role' => $this->guard()->user()->getRoleNames()[0],
             'expires_in' => $this->guard()->factory()->getTTL() * 60
         ]);
