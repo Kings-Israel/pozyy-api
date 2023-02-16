@@ -140,7 +140,7 @@ class GamesController extends Controller
 
         $trivia->save();
 
-        $trivia->load('triviaCategory')->load('triviaQuestions')->load('gaemNight');
+        $trivia->load('triviaCategory')->load('triviaQuestions')->load('gameNight');
 
         return pozzy_httpOk($trivia);
     }
