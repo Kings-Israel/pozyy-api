@@ -329,7 +329,11 @@ class videocontroller extends Controller
     }
     public function all_channel()
     {
-        $data = Channel::with('videos', 'subchannels')->get();
+        if (auth()->user()->getRoleNames()[0] === 'admin') {
+            $data = Channel::with('videos', 'subchannels')->get();
+        } else {
+            $data = Channel::with('videos', 'subchannels')->where('disabled', false)->get();
+        }
         return pozzy_httpOk($data);
     }
     public function channel_video(Request $request)
@@ -358,5 +362,19 @@ class videocontroller extends Controller
         $data = Video::where('channel_id', $request->channel_id)->where('subchannel_id', $request->subchannel_id)->get();
 
         return pozzy_httpOk($data);
+    }
+
+    public function change_channel_status($id)
+    {
+        $channel = Channel::find($id);
+
+        abort_if(!$channel, 422, 'Channel not found');
+
+        $channel->update([
+            'disabled' => $channel->disabled ? false : true,
+        ]);
+
+        $channels = Channel::withCount('videos', 'subchannels')->get();
+        return pozzy_httpOk($channels);
     }
 }
