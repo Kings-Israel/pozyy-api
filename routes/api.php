@@ -36,6 +36,8 @@ Route::group([
     Route::post('refresh', 'AuthController@refresh');
     Route::get('me', 'AuthController@me');
     Route::post('parent_register', 'AuthController@parent_register');
+    Route::post('/forgot-password', 'AuthController@forgotPassword');
+    Route::post('/reset-password', 'AuthController@resetPassword');
     // Route::post('school_register', 'AuthController@school_register');
 });
 

@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
+use App\Jobs\SendResetPasswordMail;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -17,7 +19,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'school_login', 'register', 'parent_register','parent_login', 'school_register']]);
+        $this->middleware('auth:api', ['except' => ['login', 'school_login', 'register', 'parent_register','parent_login', 'school_register', 'forgotPassword', 'resetPassword']]);
         // $this->middleware('auth:api', ['except' => ['login','register','uniqueEmail','forgotPassword','resetPassword','verifyOtp']]);
     }
 
@@ -256,4 +258,63 @@ class AuthController extends Controller
     // public function guard() {
     //     return \Auth::guard('api');
     // }
+
+    public function forgotPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->messages(), 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'Invalid email'], 422);
+        }
+
+        $code = mt_rand(10000, 99999);
+
+        $codes = User::all()->pluck('reset_password_code')->toArray();
+
+        info(gettype($codes));
+
+        while (in_array($code, $codes)) {
+            $code = mt_rand(10000, 99999);
+        }
+
+        $user->update([
+            'reset_password_code' => $code,
+        ]);
+
+        SendResetPasswordMail::dispatchAfterResponse($user->email, $code);
+
+        return response()->json(['message' => 'Password Reset Mail sent.']);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'code' => 'required',
+            'password' => 'required|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->messages(), 422);
+        }
+
+        $user = User::where('reset_password_code', $request->code)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'Invalid code'], 422);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->code),
+        ]);
+
+        return response()->json(['message' => 'Password reset successfully'], 200);
+    }
 }
