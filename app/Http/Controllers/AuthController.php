@@ -279,8 +279,6 @@ class AuthController extends Controller
 
         $codes = User::all()->pluck('reset_password_code')->toArray();
 
-        info(gettype($codes));
-
         while (in_array($code, $codes)) {
             $code = mt_rand(10000, 99999);
         }
@@ -312,7 +310,7 @@ class AuthController extends Controller
         }
 
         $user->update([
-            'password' => Hash::make($request->code),
+            'password' => Hash::make($request->password),
         ]);
 
         return response()->json(['message' => 'Password reset successfully'], 200);
