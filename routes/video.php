@@ -28,3 +28,4 @@ Route::get('/all/channels', 'Video\videocontroller@all_channel');
 Route::post('/channel/videos', 'Video\videocontroller@channel_video');
 Route::post('/subchannel/videos', 'Video\videocontroller@subchannel_videos');
 Route::get('/channel/{id}/status/update', 'Video\videocontroller@change_channel_status');
+Route::get('/subchannel/{id}/status/update', 'Video\videocontroller@change_subchannel_status');

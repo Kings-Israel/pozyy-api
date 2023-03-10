@@ -327,6 +327,7 @@ class videocontroller extends Controller
 
         return response()->json(['message' => 'Subchannel created successfullly', 'data' => $subchannel], 201);
     }
+
     public function all_channel()
     {
         if (auth()->user()->getRoleNames()[0] === 'admin') {
@@ -375,6 +376,21 @@ class videocontroller extends Controller
         ]);
 
         $channels = Channel::withCount('videos', 'subchannels')->get();
+        return pozzy_httpOk($channels);
+    }
+
+    public function change_subchannel_status($id)
+    {
+        $channel = Subchannel::find($id);
+
+        abort_if(!$channel, 422, 'Channel not found');
+
+        $channel->update([
+            'disabled' => $channel->disabled ? false : true,
+        ]);
+
+        $channels = Subchannel::withCount('videos', 'channel')->get();
+
         return pozzy_httpOk($channels);
     }
 }
