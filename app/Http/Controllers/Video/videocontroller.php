@@ -203,7 +203,23 @@ class videocontroller extends Controller
     }
     public function show_channel($id)
     {
-        $channel = Channel::with('videos.subchannel', 'subchannels.videos')->where('id', $id)->first();
+        if (auth()->user()->getRoleNames()[0] === 'admin') {
+            $channel = Channel::with('videos.subchannel', 'subchannels.videos')->where('id', $id)->first();
+        } else {
+            $channel = Channel::with(
+                    [
+                        'videos' => function($query) {
+                            $query->where('subchannel_id', NULL)
+                                ->orWhereHas('subchannel', function($query) {
+                                    $query->where('disabled', false);
+                                });
+                        },
+                        'subchannels' => function($query) {
+                            $query->where('disabled', false);
+                        }
+                    ])
+                    ->get();
+        }
 
         return response()->json($channel, 200);
     }
@@ -333,7 +349,15 @@ class videocontroller extends Controller
         if (auth()->user()->getRoleNames()[0] === 'admin') {
             $data = Channel::with('videos', 'subchannels')->get();
         } else {
-            $data = Channel::with('videos', 'subchannels')->where('disabled', false)->get();
+            $data = Channel::with(
+                            [
+                                'videos',
+                                'subchannels' => function($query) {
+                                    $query->where('disabled', false);
+                                }
+                            ])
+                            ->where('disabled', false)
+                            ->get();
         }
         return pozzy_httpOk($data);
     }
