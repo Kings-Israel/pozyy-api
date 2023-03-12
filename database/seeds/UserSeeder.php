@@ -14,9 +14,8 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
-        $check = \App\User::where('username', '=', 'taji-admin')->first();
+        $check = \App\User::where('username', '=', 'pozzy-admin')->first();
         if (!$check){
-            // $admin = DB::table('users')->insert([
             $admin = User::create([
                 'fname' => 'Pozzy',
                 'lname' => 'Admin',
@@ -29,7 +28,14 @@ class UserSeeder extends Seeder
             ]);
 
             $admin->assignRole('admin');
+        } else {
+            $check->update([
+                'password' => Hash::make('123pozyy@deveint'),
+            ]);
+        }
 
+        $check_pozzy = User::where('email', 'admin@pozzy.com')->first();
+        if (!$check_pozzy) {
             $pozzy = User::create([
                 'fname' => 'Pozzy',
                 'lname' => 'Admin',
@@ -42,6 +48,10 @@ class UserSeeder extends Seeder
             ]);
 
             $pozzy->assignRole('admin');
+        } else {
+            $check_pozzy->update([
+                'password' => Hash::make('123pozyy@deveint'),
+            ]);
         }
 
         $check = \App\User::where('username', '=', 'user-deveint')->first();
@@ -58,20 +68,5 @@ class UserSeeder extends Seeder
             ]);
             $user->assignRole('user');
         }
-
-        $check = \App\User::where('username', '=', 'data-deveint')->first();
-        if (!$check){
-            $data_entry = User::create([
-                'fname' => 'Data',
-                'lname' => 'Entry',
-                'username' => 'data-deveint',
-                'email' => 'data@deveint.com',
-                'phone_number' => '254725730009',
-                'password' => Hash::make('123456'),
-                'created_at' => \Carbon\Carbon::now(),
-                'updated_at' => \Carbon\Carbon::now(),
-            ]);
-        }
-        $data_entry->assignRole('data_entry');
     }
 }
