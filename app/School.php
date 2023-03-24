@@ -9,14 +9,18 @@ use Illuminate\Database\Eloquent\Model;
 class School extends Model
 {
     protected $guarded = ['id'];
+    
     protected $casts = [
         'suspend' => 'boolean'
     ];
 
-    public function admin() {
+    public function admin()
+    {
         return $this->hasOne(User::class);
     }
-    public function users() {
+
+    public function users()
+    {
         return $this->hasMany(User::class);
     }
 

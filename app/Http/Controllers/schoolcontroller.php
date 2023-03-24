@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use DB;
 use Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 
 class schoolcontroller extends Controller
 {
@@ -21,59 +22,68 @@ class schoolcontroller extends Controller
 
     public function add_school(Request $request)
     {
-        $this->validate($request, [
+        $validator = Validator::make($request->all(), [
             'name' => 'required',
             'logo' => 'required',
             'box' => 'required',
             'school_contact' => 'required',
             'fname' => 'required',
             'lname' => 'required',
-            'email' => 'required',
+            'email' => 'required|unique:users',
+            'phone_number' => 'required|unique:users',
             'username' => 'required',
             'password' => 'required'
         ]);
 
-        $school = new School;
-        $school->name = $request->name;
-        $school->logo = config('services.app_url.url').'/storage/school/logo/'.pathinfo($request->logo->store('logo', 'school'), PATHINFO_BASENAME);
-        $school->county = $request->county;
-        $school->box = $request->box;
-        $school->school_contact = $request->school_contact;
-        $school->save();
-
-        if (Auth::check()) {
-            if (auth()->user()->getRoleNames()[0] === 'admin') {
-                $uniqueId = mt_rand(10000, 99999);
-                $schoolsId = School::all()->pluck('school_register_id');
-                while ($schoolsId->contains($uniqueId)) {
-                    $uniqueId = mt_rand(10000, 99999);
-                }
-                $school->update([
-                    'school_register_id' => $uniqueId,
-                    'suspend' => false
-                ]);
-            }
-        } else {
-            $school->update([
-                'suspend' => true
-            ]);
+        if ($validator->fails()) {
+            return response()->json($validator->messages(), 422);
         }
 
+        try {
+            $school = new School;
+            $school->name = $request->name;
+            $school->logo = config('services.app_url.url').'/storage/school/logo/'.pathinfo($request->logo->store('logo', 'school'), PATHINFO_BASENAME);
+            $school->county = $request->county;
+            $school->box = $request->box;
+            $school->school_contact = $request->school_contact;
+            $school->save();
 
-        $user = new User;
-        $user->school_id = $school->id;
-        $user->username = $request->username;
-        $user->fname = $request->fname;
-        $user->lname = $request->lname;
-        $user->email = $request->email;
-        $user->phone_number = $request->phone_number;
-        $user->password = bcrypt($request->password);
-        $user->save();
-        $user->assignRole('school');
+            if (Auth::check()) {
+                if (auth()->user()->getRoleNames()[0] === 'admin') {
+                    $uniqueId = mt_rand(10000, 99999);
+                    $schoolsId = School::all()->pluck('school_register_id');
+                    while ($schoolsId->contains($uniqueId)) {
+                        $uniqueId = mt_rand(10000, 99999);
+                    }
+                    $school->update([
+                        'school_register_id' => $uniqueId,
+                        'suspend' => false
+                    ]);
+                }
+            } else {
+                $school->update([
+                    'suspend' => true
+                ]);
+            }
 
-        $school->load('admin');
+            $user = new User;
+            $user->school_id = $school->id;
+            $user->username = $request->username;
+            $user->fname = $request->fname;
+            $user->lname = $request->lname;
+            $user->email = $request->email;
+            $user->phone_number = $request->phone_number;
+            $user->password = bcrypt($request->password);
+            $user->save();
+            $user->assignRole('school');
 
-        return pozzy_httpOk($school);
+            $school->load('admin');
+
+            return pozzy_httpOk($school);
+        } catch (\Exception $e) {
+            throw new $e;
+        }
+
     }
     public function edit_school(Request $request)
     {

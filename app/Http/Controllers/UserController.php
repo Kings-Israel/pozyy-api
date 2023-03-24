@@ -74,7 +74,6 @@ class UserController extends Controller
 
     public function update(Request $request, $id)
     {
-        info($request->all());
         $validatedData =  Validator::make($request->all(),[
             'fname' => 'required',
             'lname' => 'required',
