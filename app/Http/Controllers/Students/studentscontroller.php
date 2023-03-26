@@ -128,9 +128,26 @@ class studentscontroller extends Controller
 
     public function verifyCode(Request $request)
     {
-        $this->validate($request, ['code' => 'required']);
+        $validator = Validator::make($request->all(), [
+            'code' => 'required',
+            'kid_id' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->messages(), 422);
+        }
 
         $school = School::where('school_register_id', $request->code)->first();
+
+        $kid = Kid::find($request->kid_id);
+
+        if (!$kid) {
+            return pozzy_httpNotFound('The Student was not found');
+        }
+
+        $kid->update([
+            'school_id' => $school->id,
+        ]);
 
         if ($school) {
             return pozzy_httpOk($school);
@@ -142,12 +159,15 @@ class studentscontroller extends Controller
     public function getKid($id)
     {
         $kid = Kid::where('id', $id)->first();
+
         if (!$kid) {
             return pozzy_httpNotFound('The student was not found');
         }
-        $kid->load(['grade', 'performances' => function($query) {
+
+        $kid->load(['grade', 'school', 'performances' => function($query) {
             return Grade::find('performances.grade_id');
         }]);
+
         return pozzy_httpOk($kid);
     }
 
