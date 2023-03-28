@@ -62,6 +62,7 @@ Route::group(['middleware' => 'jwt.auth'], function ($router) {
     Route::get('/trivia/{id}/questions', 'GamesController@getTriviaQuestions');
     Route::delete('/trivia/{id}/delete', 'GamesController@deleteTrivia');
     Route::post('/trivia/category', 'GamesController@addTriviaCategory');
+    Route::get('/trivia/category/{id}/delete', 'GamesController@deleteTriviaCategory');
     Route::post('/add/trivia', 'GamesController@addTrivia');
     Route::post('/trivia/update', 'GamesController@updateTrivia');
     Route::post('/add/trivia/question', 'GamesController@addTriviaQuestions');

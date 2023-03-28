@@ -76,6 +76,17 @@ class GamesController extends Controller
         return pozzy_httpCreated($trivia);
     }
 
+    public function deleteTriviaCategory($id)
+    {
+        $trivias = Trivia::where('trivia_category_id', $id)->get();
+
+        $trivias->each(fn ($trivia) => $trivia->update(['trivia_category_id' => NULL]));
+
+        TriviaCategory::destroy($id);
+
+        return pozzy_httpOk('Trivia Category Deleted');
+    }
+
     public function addTrivia(Request $request)
     {
         $rules = [

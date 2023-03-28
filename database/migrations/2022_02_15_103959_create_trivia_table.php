@@ -15,7 +15,7 @@ class CreateTriviaTable extends Migration
     {
         Schema::create('trivia', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('trivia_category_id');
+            $table->foreignId('trivia_category_id')->nullable();
             $table->string('title');
             $table->text('description');
             $table->string('imagePath');
