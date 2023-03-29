@@ -173,12 +173,15 @@ class AuthController extends Controller
         if ($token = $this->guard()->attempt($credentials)) {
             $user = Auth::user();
             $school = School::where('id', $user->school_id)->first();
+            if ($school->school_register_id == NULL) {
+                return response()->json(['message' => 'School is awaiting approval'], 401);
+            }
             if($school->suspend == 1) {
-                return response()->json(['Oops, school is suspended. Try again later'], 401);
+                return response()->json(['message' => 'Oops, school is suspended. Try again later'], 401);
             }
             return $this->respondWithToken($token);
         }
-        return response()->json(['error' => 'These credentials do not match with our records'], 401);
+        return response()->json(['message' => 'These credentials do not match with our records'], 401);
     }
 
     public function parent_login(Request $request) {

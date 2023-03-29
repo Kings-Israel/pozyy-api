@@ -11,6 +11,8 @@ use DB;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Video\Video;
+use App\Models\Video\Channel;
 
 class schoolcontroller extends Controller
 {
@@ -171,13 +173,15 @@ class schoolcontroller extends Controller
         $school = School::find(Auth::user()->school_id);
         $kids = [];
         if ($userRole === 'school') {
-            $kids = Kid::with(['parent', 'grade'])->where('school_id', auth()->user()->school_id)->get();
-            return pozzy_httpOk([$kids, $school]);
+            $kids = Kid::with(['parent', 'grade'])->where('school_id', $school->id)->get();
+            $videos = Video::where('school_id', $school->id)->get();
+            $channels = Channel::where('school_id', auth()->user()->school_id)->get();
+            return pozzy_httpOk([$kids, $school, $videos, $channels]);
         } elseif ($userRole === 'teacher') {
             $streams = Stream::where('user_id', auth()->user()->id)->get();
             if ($streams) {
                 foreach ($streams as $stream) {
-                    array_push($kids, Kid::with(['parent', 'grade'])->where('school_id', auth()->user()->school_id)->where('grade_id', $stream->grade_id)->get());
+                    array_push($kids, Kid::with(['parent', 'grade'])->where('school_id', $school->id)->where('grade_id', $stream->grade_id)->get());
                 }
             } else {
                 $kids = [];

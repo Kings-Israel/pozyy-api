@@ -19,9 +19,6 @@ Route::get('/activity/{id}', 'ActivityController@edit');
 Route::post('/activity/{id}', 'ActivityController@update');
 Route::delete('/activity/{id}', 'ActivityController@delete');
 
-// Route::post('/add/channel', 'videocontroller@add_channel');
-// Route::post('/add/video', 'Video\videocontroller@admin_add_video');
-
 Route::get('/add', 'UserController@index')->name('user');
 
 Route::group([

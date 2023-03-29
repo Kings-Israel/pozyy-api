@@ -146,7 +146,7 @@ class videocontroller extends Controller
             $video = Video::where([['user_id', $user->id]])->with(['stream'])->get();
             return pozzy_httpOk($video);
         } else if(Auth::user()->getRoleNames()[0] == 'school') {
-            $video = Video::where([['school_id', $user->school_id]])->with(['user'])->get();
+            $video = Video::where('school_id', $user->school_id)->with(['user'])->get();
             return pozzy_httpOk($video);
         } else {
             return pozzy_httpForbidden('Oops, you have no right to perform this operation');
@@ -155,7 +155,7 @@ class videocontroller extends Controller
     public function school_count_videos()
     {
         $user = Auth::user();
-        $data = Video::where([['school_id', $user->school_id]])->get()->count();
+        $data = Video::where('school_id', $user->school_id)->get()->count();
         return pozzy_httpOk($data);
     }
     public function school_update_video(Request $request)
@@ -348,16 +348,19 @@ class videocontroller extends Controller
     {
         if (auth()->user()->getRoleNames()[0] === 'admin') {
             $data = Channel::with('videos', 'subchannels')->get();
-        } else {
+        } elseif (auth()->user()->getRoleNames()[0] === 'school') {
+            $data = Channel::with('videos', 'subchannels')->where('school_id', auth()->user()->school_id)->get();
+        }
+        else {
             $data = Channel::with(
-                            [
-                                'videos',
-                                'subchannels' => function($query) {
-                                    $query->where('disabled', false);
-                                }
-                            ])
-                            ->where('disabled', false)
-                            ->get();
+                    [
+                        'videos',
+                        'subchannels' => function($query) {
+                            $query->where('disabled', false);
+                        }
+                    ])
+                    ->where('disabled', false)
+                    ->get();
         }
         return pozzy_httpOk($data);
     }

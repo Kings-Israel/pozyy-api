@@ -239,8 +239,8 @@ class GamesController extends Controller
         $correctAnswer = '';
 
         for ($i=0; $i < count($question->options); $i++) {
-            if ($question->options[$i][key($question->options[$i])] === true) {
-                $correctAnswer = key($question->options[$i]);
+            if ($question->options[$i]['isCorrect'] === true) {
+                $correctAnswer = $question->options[$i][key($question->options[$i])];
             }
         }
 
@@ -595,12 +595,14 @@ class GamesController extends Controller
 
     public function school_leaderboard($id)
     {
-        $kids = Kid::where('school_id', $id)->get();
-        $kids->filter(function ($kid) {
-            $kid->leaderboard()->exists();
-        });
+        $leaderboard = GamesLeaderboard::with('kid')->whereHas(
+                        'kid', function($query) use ($id) {
+                                $query->where('school_id', $id);
+                            }
+                        )
+                        ->get();
 
-        return pozzy_httpOk($kids->load('leaderboard'));
+        return pozzy_httpOk($leaderboard);
     }
 
     public function addToGameNight(Request $request)

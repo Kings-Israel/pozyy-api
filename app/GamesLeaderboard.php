@@ -15,6 +15,6 @@ class GamesLeaderboard extends Model
      */
     public function kid()
     {
-        return $this->belongsTo(Kid::class, 'user_id', 'user_id');
+        return $this->belongsTo(Kid::class, 'user_id', 'id');
     }
 }
