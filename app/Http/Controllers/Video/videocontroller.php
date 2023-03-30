@@ -113,6 +113,18 @@ class videocontroller extends Controller
     }
     public function school_add_video(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'age' => 'required',
+            'subject' => 'required',
+            'title' => 'required',
+            'description' => 'required',
+            'video' => 'required|mimes:mp4',
+            'thumbnail' => 'required|mimes:jpg,jpeg,png'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->messages(), 422);
+        }
         $user = Auth::user();
         DB::transaction(function() use($request,$user) {
             $video = new Video;
@@ -120,11 +132,9 @@ class videocontroller extends Controller
             $video->school_id = $user->school_id;
             $video->age = $request->age;
             $video->subject = $request->subject;
-            $video->stream_id = $request->stream;
             $video->title = $request->title;
             $video->description = strip_tags($request->description);
             $video->video_url = pozzy_videoCompress($request->file('video'), $user);
-            $video->subchannel_id = $request->has('subchannel') && $request->subchannel != NULL ? $request->subchannel : NULL;
             $video->save();
             $data = [
                 'user_id' => $user->id,
@@ -254,7 +264,6 @@ class videocontroller extends Controller
             'is_guide' => $request->has('is_guide') && $request->is_guide == true ? true : false,
             'thumbnail' => pathinfo($request->thumbnail->store('thumbnails', 'channel'), PATHINFO_BASENAME),
         ];
-
 
         $channel = Channel::create($data);
 
