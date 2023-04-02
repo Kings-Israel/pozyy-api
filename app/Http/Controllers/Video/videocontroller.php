@@ -119,7 +119,6 @@ class videocontroller extends Controller
             'title' => 'required',
             'description' => 'required',
             'video' => 'required|mimes:mp4',
-            'thumbnail' => 'required|mimes:jpg,jpeg,png'
         ]);
 
         if ($validator->fails()) {
@@ -173,20 +172,7 @@ class videocontroller extends Controller
         $video = Video::findOrFail($request->id);
         $video->title = $request->title;
         $video->description = strip_tags($request->description);
-
-        if($request->hasFile('thumbnail')) {
-            $exploded = explode(',', $request->thumbnail);
-            $decoded = base64_decode($exploded[1]);
-            if(Str::contains($exploded[0], 'jpeg'))
-                $extension = 'jpg';
-            else
-                $extension = 'png';
-            $fileName = time().'.'.$extension;
-            $path = public_path('storage/thumbnails').'/'.$fileName;
-            file_put_contents($path, $decoded);
-
-            $video->thumbnail = $fileName;
-        }
+        $video->video_url = pozzy_videoCompress($request->file('video'), auth()->user());
 
         $video->update();
 

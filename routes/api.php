@@ -218,3 +218,5 @@ Route::get('/mobile/media/sections', 'MobileMediaController@getSections');
 Route::get('/mobile/media/section/{name}', 'MobileMediaController@getThumbnail');
 Route::get('/mobile/media/sections/thumbnails', 'MobileMediaController@getSectionThumbnails');
 Route::post('/mobile/media/thumbnail/update', 'MobileMediaController@updateThumbnail');
+
+Route::get('/banks', [\App\Http\Controllers\schoolcontroller::class, 'banks']);

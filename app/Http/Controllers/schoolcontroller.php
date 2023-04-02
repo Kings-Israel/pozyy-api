@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\{Kid, User,School,Stream};
+use App\{Bank, Kid, User, School, Stream};
 use App\Models\{Grade,Test,Subject};
 use App\Models\Clubs\{Club,ClubActivity};
 use Illuminate\Support\Facades\Storage;
@@ -16,6 +16,10 @@ use App\Models\Video\Channel;
 
 class schoolcontroller extends Controller
 {
+    public function banks()
+    {
+        return pozzy_httpOk(Bank::all());
+    }
     public function all_schools()
     {
         $school = School::with('admin', 'grades')->get();
@@ -34,7 +38,7 @@ class schoolcontroller extends Controller
             'email' => 'required|unique:users',
             'phone_number' => 'required|unique:users',
             'username' => 'required',
-            'password' => 'required'
+            'password' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -48,6 +52,10 @@ class schoolcontroller extends Controller
             $school->county = $request->county;
             $school->box = $request->box;
             $school->school_contact = $request->school_contact;
+            $school->bank_name = $request->has('bank_name') && $request->bank_name != '' ? $request->bank_name : NULL;
+            $school->bank_branch = $request->has('bank_branch') && $request->bank_branch != '' ? $request->bank_branch : NULL;
+            $school->bank_account_holder_name = $request->has('bank_account_holder_name') && $request->bank_account_holder_name != '' ? $request->bank_account_holder_name : NULL;
+            $school->bank_account_number = $request->has('bank_account_number') && $request->bank_account_number != '' ? $request->bank_account_number : NULL;
             $school->save();
 
             if (Auth::check()) {
@@ -106,7 +114,11 @@ class schoolcontroller extends Controller
                     'name' => $request->name,
                     'county' => $request->county,
                     'box' => $request->box,
-                    'school_contact' => $request->school_contact
+                    'school_contact' => $request->school_contact,
+                    'bank_name' => $request->has('bank_name') && $request->bank_name != '' ? $request->bank_name : $edit->bank_name,
+                    'bank_branch' => $request->has('bank_branch') && $request->bank_branch != '' ? $request->bank_branch : $edit->bank_branch,
+                    'bank_account_holder_name' => $request->has('bank_account_holder_name') && $request->bank_account_holder_name != '' ? $request->bank_account_holder_name : $edit->bank_account_holder_name,
+                    'bank_account_number' => $request->has('bank_account_number') && $request->bank_account_number != '' ? $request->bank_account_number : $edit->bank_account_number,
                 ]);
                 if ($request->hasFile('logo')) {
                     $filePath = $edit->logo;
@@ -170,7 +182,7 @@ class schoolcontroller extends Controller
     public function school_data()
     {
         $userRole = Auth::user()->getRoleNames()[0];
-        $school = School::find(Auth::user()->school_id);
+        $school = School::with('admin')->find(Auth::user()->school_id);
         $kids = [];
         if ($userRole === 'school') {
             $kids = Kid::with(['parent', 'grade'])->where('school_id', $school->id)->get();
