@@ -90,7 +90,7 @@ class GamesController extends Controller
     public function addTrivia(Request $request)
     {
         $rules = [
-            'category_id' => ['required'],
+            // 'category_id' => ['required'],
             'age_group' => ['required'],
             'title' => ['required'],
             'description' => ['required'],
@@ -106,7 +106,7 @@ class GamesController extends Controller
         }
 
         $trivia = Trivia::create([
-            'trivia_category_id' => $request->category_id,
+            // 'trivia_category_id' => $request->category_id,
             'age_group' => $request->age_group,
             'title' => $request->title,
             'description' => strip_tags($request->description),
