@@ -238,7 +238,7 @@ class GameNightController extends Controller
 
     public function getGameDays()
     {
-        $game_nights = GameNight::with('triviaGames', 'twoPicsGames', 'spotDifferencesGames', 'category')->where('category_id', 1)->get();
+        $game_nights = GameNight::with('triviaGames.triviaQuestions', 'twoPicsGames', 'spotDifferencesGames', 'category')->where('category_id', 1)->get();
 
         foreach ($game_nights as $key => $game_night) {
             if ($game_night->userCanPlay()) {
@@ -253,7 +253,7 @@ class GameNightController extends Controller
 
     public function getCreatorsChallenges()
     {
-        $game_nights = GameNight::with('triviaGames', 'twoPicsGames', 'spotDifferencesGames', 'category')->where('category_id', 2)->get();
+        $game_nights = GameNight::with('triviaGames.triviaQuestions', 'twoPicsGames', 'spotDifferencesGames', 'category')->where('category_id', 2)->get();
 
         foreach ($game_nights as $key => $game_night) {
             if ($game_night->userCanPlay()) {
