@@ -19,9 +19,10 @@ class MpesaPaymentController extends Controller
     public function stkPush($phone, $amount, $callback, $account_number, $remarks)
     {
        $url = Mpesa::oxerus_mpesaGetStkPushUrl();
+       $token = Mpesa::oxerus_mpesaGenerateAccessToken();
        $curl = curl_init();
        curl_setopt($curl, CURLOPT_URL, $url);
-       curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type:application/json', 'Authorization:Bearer ' . Mpesa::oxerus_mpesaGenerateAccessToken()));
+       curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type:application/json', 'Authorization:Bearer ' . $token));
        $curl_post_data = [
           'BusinessShortCode' => config('services.mpesa.business_shortcode'),
           'Password' => Mpesa::oxerus_mpesaLipaNaMpesaPassword(),

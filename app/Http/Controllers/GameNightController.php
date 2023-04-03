@@ -181,8 +181,8 @@ class GameNightController extends Controller
         $transaction = new MpesaPaymentController;
         $results = $transaction->stkPush(
             $phone_number,
-            // $game_night->price,
-            '1',
+            $game_night->price,
+            // '1',
             route('game-night.payment.callback'),
             $account_number,
             'Game Night Payment'
