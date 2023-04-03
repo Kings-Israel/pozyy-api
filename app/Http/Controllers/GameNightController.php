@@ -23,7 +23,7 @@ class GameNightController extends Controller
 {
     public function index()
     {
-        $game_nights = GameNight::with('triviaGames', 'twoPicsGames', 'spotDifferencesGames', 'category')->get();
+        $game_nights = GameNight::with('triviaGames.triviaQuestions', 'twoPicsGames', 'spotDifferencesGames', 'category')->get();
 
         return pozzy_httpOk($game_nights);
     }
@@ -127,7 +127,7 @@ class GameNightController extends Controller
 
     public function getGameNights()
     {
-        $game_nights = GameNight::with('triviaGames', 'twoPicsGames', 'spotDifferencesGames', 'category')->get();
+        $game_nights = GameNight::with('triviaGames.triviaQuestions', 'twoPicsGames', 'spotDifferencesGames', 'category')->get();
 
         foreach ($game_nights as $key => $game_night) {
             if ($game_night->userCanPlay()) {
