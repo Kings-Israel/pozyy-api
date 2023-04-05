@@ -124,8 +124,8 @@ class GamesController extends Controller
     {
         $rules = [
             'trivia_id' => ['required'],
-            'category_id' => ['required'],
-            'age_group' => ['required'],
+            // 'category_id' => ['required'],
+            // 'age_group' => ['required'],
             'title' => ['required'],
             'description' => ['required'],
         ];
@@ -139,8 +139,8 @@ class GamesController extends Controller
         $trivia = Trivia::find($request->trivia_id);
         $trivia->title = $request->title;
         $trivia->description = strip_tags($request->description);
-        $trivia->trivia_category_id = $request->category_id;
-        $trivia->age_group = $request->age_group;
+        // $trivia->trivia_category_id = $request->category_id;
+        // $trivia->age_group = $request->age_group;
         $trivia->start_time = $request->start_time;
         $trivia->end_time = Carbon::parse($request->start_time)->addMinutes($request->end_time);
 
