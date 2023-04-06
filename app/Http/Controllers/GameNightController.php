@@ -23,7 +23,18 @@ class GameNightController extends Controller
 {
     public function index()
     {
-        $game_nights = GameNight::with('triviaGames.triviaQuestions', 'twoPicsGames', 'spotDifferencesGames', 'category')->get();
+        $game_nights = GameNight::with([
+                                    'triviaGames.triviaQuestions',
+                                    'twoPicsGames',
+                                    'spotDifferencesGames',
+                                    'category'
+                                ])
+                                ->withCount([
+                                    'payments' => function($query) {
+                                        $query->where('mpesa_receipt_number', '!=', null);
+                                    }
+                                ])
+                                ->get();
 
         return pozzy_httpOk($game_nights);
     }
@@ -167,6 +178,10 @@ class GameNightController extends Controller
 
         if(!$game_night) {
             return response()->json(['message' => 'Game night not found'], 400);
+        }
+
+        if ($game_night->userCanPlay()) {
+            return response()->json(['message' => 'User already paid for game night'], 200);
         }
 
         $phone_number = Auth::user()->phone_number;

@@ -72,4 +72,9 @@ class GameNight extends Model
 
         return false;
     }
+
+    public function payments()
+    {
+        return $this->morphMany(MpesaPayment::class, 'mpesa_payable');
+    }
 }

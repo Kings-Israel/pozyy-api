@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Video\Video;
 use App\Models\Video\Channel;
+use App\UserGameNight;
 
 class schoolcontroller extends Controller
 {
@@ -188,6 +189,17 @@ class schoolcontroller extends Controller
             $kids = Kid::with(['parent', 'grade'])->where('school_id', $school->id)->get();
             $videos = Video::where('school_id', $school->id)->get();
             $channels = Channel::where('school_id', auth()->user()->school_id)->get();
+            // Get School Users
+            $users = $school->users->filter(function ($user) use ($school) {
+                return $user->email === $school->admin->email;
+            });
+
+            $user_game_nights = UserGameNight::all()->pluck('user_id');
+
+            $users = $users->filter(function ($user) use ($user_game_nights) {
+                return !collect($user_game_nights)->contains($user->id);
+            });
+            // info($users);
             return pozzy_httpOk([$kids, $school, $videos, $channels]);
         } elseif ($userRole === 'teacher') {
             $streams = Stream::where('user_id', auth()->user()->id)->get();
