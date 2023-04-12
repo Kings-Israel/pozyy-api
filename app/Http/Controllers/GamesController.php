@@ -8,6 +8,7 @@ use App\Trivia;
 use App\GameNight;
 use Carbon\Carbon;
 use App\TwoPicsGame;
+use App\UserGameNight;
 use App\SpotDifference;
 use App\TriviaCategory;
 use App\TriviaQuestion;
@@ -602,7 +603,19 @@ class GamesController extends Controller
                         )
                         ->get();
 
-        return pozzy_httpOk($leaderboard);
+        $user_game_nights = null;
+        $school = School::with('admin')->find(auth()->user()->school_id);
+
+        if ($school->users->count() > 0) {
+            // Get School Users
+            $users = $school->users->filter(function ($user) {
+                return $user->email !== auth()->user()->email;
+            })->pluck('id');
+
+            $user_game_nights = UserGameNight::withCount('user')->with('gameNight')->whereIn('user_id', $users)->get();
+        }
+
+        return pozzy_httpOk(['leaderboard' => $leaderboard, 'game_night_data' => $user_game_nights]);
     }
 
     public function addToGameNight(Request $request)

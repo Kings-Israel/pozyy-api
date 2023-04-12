@@ -185,33 +185,11 @@ class schoolcontroller extends Controller
         $userRole = Auth::user()->getRoleNames()[0];
         $school = School::with('admin')->find(Auth::user()->school_id);
         $kids = [];
-        if ($userRole === 'school') {
-            $kids = Kid::with(['parent', 'grade'])->where('school_id', $school->id)->get();
-            $videos = Video::where('school_id', $school->id)->get();
-            $channels = Channel::where('school_id', auth()->user()->school_id)->get();
-            // Get School Users
-            $users = $school->users->filter(function ($user) use ($school) {
-                return $user->email === $school->admin->email;
-            });
+        $kids = Kid::with(['parent', 'grade'])->where('school_id', $school->id)->get();
+        $videos = Video::where('school_id', $school->id)->get();
+        $channels = Channel::where('school_id', auth()->user()->school_id)->get();
 
-            $user_game_nights = UserGameNight::all()->pluck('user_id');
-
-            $users = $users->filter(function ($user) use ($user_game_nights) {
-                return !collect($user_game_nights)->contains($user->id);
-            });
-            // info($users);
-            return pozzy_httpOk([$kids, $school, $videos, $channels]);
-        } elseif ($userRole === 'teacher') {
-            $streams = Stream::where('user_id', auth()->user()->id)->get();
-            if ($streams) {
-                foreach ($streams as $stream) {
-                    array_push($kids, Kid::with(['parent', 'grade'])->where('school_id', $school->id)->where('grade_id', $stream->grade_id)->get());
-                }
-            } else {
-                $kids = [];
-            }
-            return pozzy_httpOk([$kids, $school]);
-        }
+        return pozzy_httpOk([$kids, $school, $videos, $channels]);
     }
 
     public function add_class(Request $request)
