@@ -5,14 +5,15 @@ namespace App;
 use App\Models\Clubs\Club;
 use App\Models\Grade;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Kid extends Model
 {
     protected $guarded = ['id'];
 
-    public function parent()
+    public function parent(): BelongsTo
     {
-        return $this->hasOne(User::class, 'id', 'parent_id');
+        return $this->belongsTo(User::class, 'parent_id', 'id');
     }
 
     /**

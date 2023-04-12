@@ -9,10 +9,17 @@ use Illuminate\Database\Eloquent\Model;
 class School extends Model
 {
     protected $guarded = ['id'];
-    
+
     protected $casts = [
         'suspend' => 'boolean'
     ];
+
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = ['bank_name', 'bank_branch', 'bank_account_holder_name', 'bank_account_number'];
 
     public function admin()
     {
