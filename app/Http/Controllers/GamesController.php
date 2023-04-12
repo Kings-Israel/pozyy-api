@@ -582,7 +582,7 @@ class GamesController extends Controller
         // Compare the response with the differences
         $answer = SpotDifference::find($request->game_id);
         $savedDifferences = collect($answer->differences)->map(fn ($difference) => strtolower(trim($difference)));
-        
+
         $points = 0;
         collect($differences)->each(function ($difference) use ($savedDifferences, $points) {
             if($savedDifferences->contains($difference)) {
@@ -612,10 +612,9 @@ class GamesController extends Controller
 
     public function leaderboard()
     {
-        $leaderboard = GamesLeaderboard::all()->unique('kid_id');
-
         $kids = [];
         if (auth()->user()->getRoleNames()[0] === 'admin') {
+            $leaderboard = GamesLeaderboard::all()->unique('kid_id');
             foreach ($leaderboard as $kid) {
                 $kidDetails = Kid::with('school')->find($kid->kid_id);
                 $kidDetails['total_points'] = GamesLeaderboard::where('kid_id', $kid->id)->sum('total_points');
@@ -623,10 +622,11 @@ class GamesController extends Controller
                 array_push($kids, $kidDetails);
             }
         } else {
-            foreach ($leaderboard as $kid) {
-                $kidDetails = User::with('kids.school')->find($kid->kid->parent_id);
-                $kidDetails['total_points'] = GamesLeaderboard::where('kid_id', $kid->id)->sum('total_points');
-                $kidDetails['total_time'] = GamesLeaderboard::where('kid_id', $kid->id)->sum('total_time');
+            $leaderboard = GamesLeaderboard::all()->unique('user_id');
+            foreach ($leaderboard as $board) {
+                $kidDetails = User::with('kids.school')->find($board->kid->parent_id);
+                $kidDetails['total_points'] = GamesLeaderboard::where('user_id', $board->user_id)->sum('total_points');
+                $kidDetails['total_time'] = GamesLeaderboard::where('user_id', $board->user_id)->sum('total_time');
                 array_push($kids, $kidDetails);
             }
         }
