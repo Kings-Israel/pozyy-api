@@ -40,6 +40,12 @@ class GamesController extends Controller
     {
         $questions = Trivia::with('triviaQuestions')->with('triviaCategory')->where('id', $id)->get();
 
+        foreach ($questions as $trivia) {
+            foreach ($trivia->triviaQuestions as $question) {
+                $question['user_has_played'] = $question->userHasPlayed(auth()->user());
+            }
+        }
+
         return pozzy_httpOk($questions);
     }
 
@@ -211,10 +217,6 @@ class GamesController extends Controller
         }
 
         if ($newGame != null) {
-            DB::table('users_games_played')->insert(
-                ['user_id' => auth()->user()->id,
-                'trivia_id' => $newGame->id]
-            );
             return pozzy_httpOk($newGame);
         } else {
             return pozzy_httpOk('No new game found');
@@ -259,6 +261,11 @@ class GamesController extends Controller
             'total_time' => (int) $question->duration - (int) $request->duration,
             'gameable_id' => $question->id,
             'gameable_type' => TriviaQuestion::class
+        ]);
+
+        DB::table('users_games_played')->insert([
+            'user_id' => auth()->id(),
+            'trivia_id' => $question->id
         ]);
 
         return pozzy_httpOk('Game saved');
@@ -378,10 +385,6 @@ class GamesController extends Controller
         }
 
         if ($newGame != null) {
-            DB::table('users_games_played')->insert(
-                ['user_id' => auth()->user()->id,
-                'two_pics_games_id' => $newGame->id]
-            );
             return pozzy_httpOk($newGame);
         } else {
             return pozzy_httpOk('No new game found');
@@ -424,6 +427,11 @@ class GamesController extends Controller
             'total_time' => (int) $answer->duration - (int) $request->duration,
             'gameable_id' => $answer->id,
             'gameable_type' => TwoPicsGame::class
+        ]);
+
+        DB::table('users_games_played')->insert([
+            'user_id' => auth()->user()->id,
+            'two_pics_games_id' => $answer->id
         ]);
 
         return pozzy_httpOk('Game saved');
@@ -541,11 +549,6 @@ class GamesController extends Controller
         }
 
         if ($newGame != null) {
-            // Add Game to Games played by user table
-            DB::table('users_games_played')->insert(
-                ['user_id' => auth()->user()->id,
-                'spot_difference_id' => $newGame->id]
-            );
             // Return game
             return pozzy_httpOk($newGame);
         } else {
@@ -605,6 +608,11 @@ class GamesController extends Controller
             'total_time' => (int) $answer->duration - (int) $request->duration,
             'gameable_id' => $answer->id,
             'gameable_type' => SpotDifference::class
+        ]);
+
+        DB::table('users_games_played')->insert([
+            'user_id' => auth()->user()->id,
+            'spot_difference_id' => $answer->id
         ]);
 
         return pozzy_httpOk('Game saved');

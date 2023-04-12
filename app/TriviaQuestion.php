@@ -30,6 +30,9 @@ class TriviaQuestion extends Model
         }
 
         $exists = DB::table('users_games_played')->where('user_id', $user->id)->where('trivia_id', $this->id)->first();
-        return $exists;
+        if ($exists) {
+            return true;
+        }
+        return false;
     }
 }
