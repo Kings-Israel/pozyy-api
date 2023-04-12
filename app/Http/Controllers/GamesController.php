@@ -275,6 +275,10 @@ class GamesController extends Controller
     {
         $picsGames = TwoPicsGame::with('gameNight')->get();
 
+        foreach ($picsGames as $game) {
+            $question['user_has_played'] = $game->userHasPlayed(auth()->user());
+        }
+
         return pozzy_httpOk($picsGames);
     }
 
@@ -440,6 +444,10 @@ class GamesController extends Controller
     public function getSpotDifferenceGames()
     {
         $games = SpotDifference::with('gameNight')->get();
+
+        foreach ($games as $game) {
+            $question['user_has_played'] = $game->userHasPlayed(auth()->user());
+        }
 
         return pozzy_httpOk($games);
     }
