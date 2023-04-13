@@ -12,8 +12,8 @@ Route::group(['middleware' => 'jwt.auth', 'prefix' => 'event', 'as' => 'event.']
   Route::get('/admin/{id}', [EventController::class, 'adminGetEvent'])->name('admin.event');
 
   Route::get('/{id}', [EventController::class, 'singleEvent'])->name('single');
-  Route::get('/user/purchased/tickets', [EventController::class, 'purchasedTickets'])->name('user.purchased.tickets');
-  Route::post('/ticket/purchase', 'EventController@buyTicket')->name('ticket.purchase');
+  Route::get('/purchased/tickets', [EventController::class, 'purchasedTickets'])->name('user.purchased.tickets');
+  Route::post('/ticket/purchase', [EventController::class, 'buyTicket'])->name('ticket.purchase');
 });
 
 Route::post('event/ticket/purchase/callback', 'EventController@buyTicketMpesaCallback')->name('event.ticket.purchase.callback');

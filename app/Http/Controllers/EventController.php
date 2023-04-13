@@ -25,6 +25,12 @@ class EventController extends Controller
   {
     $events = Event::all();
 
+    if (auth()->user()->getRoleNames()[0] != 'admin') {
+        $events->each(function($event) {
+            $event['has_ticket'] = $event->userHasTicket();
+        });
+    }
+
     return pozzy_httpOk($events);
   }
 
@@ -102,6 +108,10 @@ class EventController extends Controller
   {
     $event = Event::find($id);
 
+    if (auth()->user()->getRoleNames()[0] != 'admin') {
+        $event['has_ticket'] = $event->userHasTicket();
+    }
+
     return pozzy_httpOk($event);
   }
 
@@ -148,7 +158,7 @@ class EventController extends Controller
         $account_number,
         'Purchase of Event Ticket'
     );
-    info($results);
+
     if ($results['response_code'] != NULL) {
         $mpesa_payable_type = Event::class;
         MpesaPayment::create([
