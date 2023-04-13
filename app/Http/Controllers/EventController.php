@@ -206,16 +206,15 @@ class EventController extends Controller
 
   public function purchasedTickets()
   {
-    $tickets = EventUserTicket::where('user_id', auth()->user()->id)->where('isPaid', true)->get();
+    $tickets = EventUserTicket::with('event')->where('user_id', auth()->user()->id)->where('isPaid', true)->get();
 
-    if (!$tickets->isEmpty()) {
-        $events = [];
-        foreach ($tickets as $ticket) {
-            array_push($events, Event::find($ticket->event_id));
-        }
-
-        return pozzy_httpOk($events);
-    }
+    return pozzy_httpOk($tickets);
+    // if (!$tickets->isEmpty()) {
+    //     $events = [];
+    //     foreach ($tickets as $ticket) {
+    //         array_push($events, Event::find($ticket->event_id));
+    //     }
+    // }
 
     return pozzy_httpOk('No tickets bought');
 

@@ -9,15 +9,6 @@ class Event extends Model
   protected $guarded = [];
 
   /**
-   * The attributes that should be cast to native types.
-   *
-   * @var array
-   */
-  protected $casts = [
-    'isPaid' => 'bool',
-  ];
-
-  /**
    * Get all of the eventUserTicket for the Event
    *
    * @return \Illuminate\Database\Eloquent\Relations\HasMany
