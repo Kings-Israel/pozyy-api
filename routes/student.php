@@ -8,7 +8,7 @@ Route::group(['prefix' => 'student', 'middleware' => 'jwt.auth'], function() {
     Route::post('/school/code/verify', 'Students\studentscontroller@verifyCode');
     Route::get('/all/channels','Students\studentscontroller@all_channels');
     Route::post('/all/videos', 'Students\studentscontroller@all_videos');
-    Route::post('/school/videos', 'Students\studentscontroller@school_video');
+    Route::get('/school/{id}/videos', 'Students\studentscontroller@school_video');
     Route::get('/details/{id}', 'Students\studentscontroller@getKid');
     Route::post('/performance/save', 'Students\studentscontroller@addKidPerformance');
     Route::post('/grade/assign', 'Students\studentscontroller@assignGrade');

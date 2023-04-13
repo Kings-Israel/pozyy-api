@@ -35,11 +35,16 @@ class studentscontroller extends Controller
         }
     }
 
-    public function school_video(Request $request)
+    public function school_video($school_id)
     {
-        $this->validate($request, ['school_id' => 'required']);
+        $school = School::where('id', $school_id)->orWhere('school_register_id', $school_id)->first();
 
-        $data = Video::where('school_id', $request->school_id)->get();
+        if (!$school) {
+            return pozzy_httpNotFound('School not found');
+        }
+
+        $data = Video::where('school_id', $school->id)->get();
+
         if ($data->count()) {
             return pozzy_httpOk($data);
         }
