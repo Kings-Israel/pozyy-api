@@ -239,6 +239,15 @@ class GamesController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
+        $user_has_played = DB::table('users_games_played')->where([
+                                'user_id' => auth()->id(),
+                                'trivia_id' => $request->question_id
+                            ])->first();
+
+        if ($user_has_played) {
+            return pozzy_httpForbidden('You have already played this game');
+        }
+
         $question = TriviaQuestion::find($request->question_id);
         $correctAnswer = '';
 
@@ -248,8 +257,10 @@ class GamesController extends Controller
             }
         }
 
+        $points = 0;
+
         if (strtolower($request->answer) != strtolower($correctAnswer)) {
-            return pozzy_httpBadRequest('The answer submitted was not correct');
+            $points = 5;
         }
 
         $kid = Kid::with('parent')->find($request->kid_id);
@@ -257,7 +268,7 @@ class GamesController extends Controller
         GamesLeaderboard::create([
             'user_id' => $kid->parent->id,
             'kid_id' => $kid->id,
-            'total_points' => 5,
+            'total_points' => $points,
             'total_time' => (int) $question->duration - (int) $request->duration,
             'gameable_id' => $question->id,
             'gameable_type' => TriviaQuestion::class
@@ -410,10 +421,21 @@ class GamesController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
+        $user_has_played = DB::table('users_games_played')->where([
+                    'user_id' => auth()->id(),
+                    'two_pics_games_id' => $request->game_id
+                ])->first();
+
+        if ($user_has_played) {
+            return pozzy_httpForbidden('You have already played this game');
+        }
+
         $answer = TwoPicsGame::find($request->game_id);
 
-        if (strtolower($answer->answer) != strtolower($request->answer)) {
-            return pozzy_httpBadRequest('The answer is not correct');
+        $points = 0;
+
+        if (strtolower($answer->answer) === strtolower($request->answer)) {
+            $points = 5;
         }
 
         // $leaderboard = GamesLeaderboard::firstOrNew(['user_id' => $request->kid_id]);
@@ -427,7 +449,7 @@ class GamesController extends Controller
         GamesLeaderboard::create([
             'user_id' => $kid->parent->id,
             'kid_id' => $kid->id,
-            'total_points' => 5,
+            'total_points' => $points,
             'total_time' => (int) $answer->duration - (int) $request->duration,
             'gameable_id' => $answer->id,
             'gameable_type' => TwoPicsGame::class
@@ -577,6 +599,15 @@ class GamesController extends Controller
 
         if($validator->fails()) {
             return response()->json($validator->errors(), 422);
+        }
+
+        $user_has_played = DB::table('users_games_played')->where([
+                    'user_id' => auth()->id(),
+                    'spot_difference_id' => $request->game_id
+                ])->first();
+
+        if ($user_has_played) {
+            return pozzy_httpForbidden('You have already played this game');
         }
 
         // Get the type of differences variable
