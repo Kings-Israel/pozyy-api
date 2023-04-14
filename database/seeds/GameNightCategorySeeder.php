@@ -18,7 +18,7 @@ class GameNightCategorySeeder extends Seeder
         ]);
 
         GameNightCategory::create([
-            'name' => 'Creators Challenge',
+            'name' => 'Family Challenge',
         ]);
 
         $game_nights = GameNight::all();

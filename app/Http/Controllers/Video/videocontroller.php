@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\Video;
 
-use DB;
-use Auth;
 use App\School;
 use App\Subchannel;
 use App\Models\Video\Video;
@@ -12,6 +10,8 @@ use Illuminate\Http\Request;
 use App\Models\Video\Channel;
 use App\Models\Video\UserVideo;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -60,17 +60,23 @@ class videocontroller extends Controller
         $video->description = strip_tags($request->description);
 
         if($request->hasFile('thumbnail')) {
-            $exploded = explode(',', $request->thumbnail);
-            $decoded = base64_decode($exploded[1]);
-            if(Str::contains($exploded[0], 'jpeg'))
-                $extension = 'jpg';
-            else
-                $extension = 'png';
-            $fileName = time().'.'.$extension;
-            $path = public_path('storage/thumbnails').'/'.$fileName;
-            file_put_contents($path, $decoded);
+            $video_thumbnail = explode('/', $video->thumbnail);
+            $thumbnail = end($video_thumbnail);
+            Storage::disk('videos')->delete('thumbnails/'.$thumbnail);
 
-            $video->thumbnail = $fileName;
+            $video->thumbnail = config('services.app_url.url').'/storage/videos/thumbnails/'.pathinfo($request->thumbnail->store('thumbnails', 'videos'), PATHINFO_BASENAME);
+            
+            // $exploded = explode(',', $request->thumbnail);
+            // $decoded = base64_decode($exploded[1]);
+            // if(Str::contains($exploded[0], 'jpeg'))
+            //     $extension = 'jpg';
+            // else
+            //     $extension = 'png';
+            // $fileName = time().'.'.$extension;
+            // $path = public_path('storage/thumbnails').'/'.$fileName;
+            // file_put_contents($path, $decoded);
+
+            // // $video->thumbnail = $fileName;
         }
 
         $video->update();
@@ -83,8 +89,9 @@ class videocontroller extends Controller
 
         Storage::disk('videos')->delete('video/'.$video->video_url);
 
-        // unlink(public_path('storage/thumbnails/'.$video->thumbnail));
-        Storage::disk('videos')->delete('thumbnails/'.$video->thumbnail);
+        $video_thumbnail = explode('/', $video->thumbnail);
+        $thumbnail = end($video_thumbnail);
+        Storage::disk('videos')->delete('thumbnails/'.$thumbnail);
 
         $video->delete();
         return pozzy_httpOk('Video deleted successfully');
@@ -119,6 +126,7 @@ class videocontroller extends Controller
             'title' => 'required',
             'description' => 'required',
             'video' => 'required|mimes:mp4',
+            'thumbnail' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -134,6 +142,7 @@ class videocontroller extends Controller
             $video->title = $request->title;
             $video->description = strip_tags($request->description);
             $video->video_url = pozzy_videoCompress($request->file('video'), $user);
+            $video->thumbnail = config('services.app_url.url').'/storage/videos/thumbnails/'.pathinfo($request->thumbnail->store('thumbnails', 'videos'), PATHINFO_BASENAME);
             $video->save();
             $data = [
                 'user_id' => $user->id,
@@ -173,6 +182,7 @@ class videocontroller extends Controller
         $video->title = $request->title;
         $video->description = strip_tags($request->description);
         $video->video_url = pozzy_videoCompress($request->file('video'), auth()->user());
+        $video->thumbnail = config('services.app_url.url').'/storage/videos/thumbnails/'.pathinfo($request->thumbnail->store('thumbnails', 'videos'), PATHINFO_BASENAME);
 
         $video->update();
 
@@ -191,8 +201,9 @@ class videocontroller extends Controller
 
         Storage::disk('videos')->delete('video/'.$video->video_url);
 
-        // unlink(public_path('storage/thumbnails/'.$video->thumbnail));
-        Storage::disk('videos')->delete('thumbnails/'.$video->thumbnail);
+        $video_thumbnail = explode('/', $video->thumbnail);
+        $thumbnail = end($video_thumbnail);
+        Storage::disk('videos')->delete('thumbnails/'.$thumbnail);
 
         $video->delete();
         return pozzy_httpOk('Video deleted successfully');
@@ -338,7 +349,6 @@ class videocontroller extends Controller
 
         return response()->json(['message' => 'Subchannel created successfullly', 'data' => $subchannel], 201);
     }
-
     public function all_channel()
     {
         if (auth()->user()->getRoleNames()[0] === 'admin') {
@@ -386,7 +396,6 @@ class videocontroller extends Controller
 
         return pozzy_httpOk($data);
     }
-
     public function change_channel_status($id)
     {
         $channel = Channel::find($id);
@@ -400,7 +409,6 @@ class videocontroller extends Controller
         $channels = Channel::withCount('videos', 'subchannels')->get();
         return pozzy_httpOk($channels);
     }
-
     public function change_subchannel_status($id)
     {
         $channel = Subchannel::find($id);

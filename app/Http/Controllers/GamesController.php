@@ -248,7 +248,8 @@ class GamesController extends Controller
             return pozzy_httpForbidden('You have already played this game');
         }
 
-        $question = TriviaQuestion::find($request->question_id);
+        $question = TriviaQuestion::with('trivia.gameNight')->find($request->question_id);
+
         $correctAnswer = '';
 
         for ($i=0; $i < count($question->options); $i++) {
@@ -259,11 +260,17 @@ class GamesController extends Controller
 
         $points = 0;
 
-        if (strtolower($request->answer) != strtolower($correctAnswer)) {
+        if (strtolower($request->answer) === strtolower($correctAnswer)) {
             $points = 5;
         }
 
         $kid = Kid::with('parent')->find($request->kid_id);
+
+        $game_night_id = null;
+
+        if($question->trivia->gameNight) {
+            $game_night_id = $question->trivia->gameNight->id;
+        }
 
         GamesLeaderboard::create([
             'user_id' => $kid->parent->id,
@@ -271,12 +278,15 @@ class GamesController extends Controller
             'total_points' => $points,
             'total_time' => (int) $question->duration - (int) $request->duration,
             'gameable_id' => $question->id,
-            'gameable_type' => TriviaQuestion::class
+            'gameable_type' => TriviaQuestion::class,
+            'game_night_id' => $game_night_id,
         ]);
 
         DB::table('users_games_played')->insert([
             'user_id' => auth()->id(),
-            'trivia_id' => $question->id
+            'trivia_id' => $question->id,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         return pozzy_httpOk('Game saved');
@@ -446,18 +456,27 @@ class GamesController extends Controller
 
         $kid = Kid::with('parent')->find($request->kid_id);
 
+        $game_night_id = null;
+
+        if($answer->gameNight) {
+            $game_night_id = $answer->gameNight->id;
+        }
+
         GamesLeaderboard::create([
             'user_id' => $kid->parent->id,
             'kid_id' => $kid->id,
             'total_points' => $points,
             'total_time' => (int) $answer->duration - (int) $request->duration,
             'gameable_id' => $answer->id,
-            'gameable_type' => TwoPicsGame::class
+            'gameable_type' => TwoPicsGame::class,
+            'game_night_id' => $game_night_id,
         ]);
 
         DB::table('users_games_played')->insert([
             'user_id' => auth()->user()->id,
-            'two_pics_games_id' => $answer->id
+            'two_pics_games_id' => $answer->id,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         return pozzy_httpOk('Game saved');
@@ -640,18 +659,27 @@ class GamesController extends Controller
 
         $kid = Kid::with('parent')->find($request->kid_id);
 
+        $game_night_id = null;
+
+        if($answer->gameNight) {
+            $game_night_id = $answer->gameNight->id;
+        }
+
         GamesLeaderboard::create([
             'user_id' => $kid->parent->id,
             'kid_id' => $kid->id,
             'total_points' => (int) $points,
             'total_time' => (int) $answer->duration - (int) $request->duration,
             'gameable_id' => $answer->id,
-            'gameable_type' => SpotDifference::class
+            'gameable_type' => SpotDifference::class,
+            'game_night_id' => $game_night_id,
         ]);
 
         DB::table('users_games_played')->insert([
             'user_id' => auth()->user()->id,
-            'spot_difference_id' => $answer->id
+            'spot_difference_id' => $answer->id,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         return pozzy_httpOk('Game saved');
@@ -661,19 +689,30 @@ class GamesController extends Controller
     {
         $kids = [];
         if (auth()->user()->getRoleNames()[0] === 'admin') {
-            $leaderboard = GamesLeaderboard::all()->unique('kid_id');
-            foreach ($leaderboard as $kid) {
-                $kidDetails = Kid::with('school')->find($kid->kid_id);
-                $kidDetails['total_points'] = GamesLeaderboard::where('kid_id', $kid->id)->sum('total_points');
-                $kidDetails['total_time'] = GamesLeaderboard::where('kid_id', $kid->id)->sum('total_time');
-                array_push($kids, $kidDetails);
-            }
-        } else {
-            $leaderboard = GamesLeaderboard::all()->unique('user_id');
+            // Get Latest Game Night
+            $game_night = GameNight::latest()->first();
+            $leaderboard = GamesLeaderboard::where('game_night_id', $game_night->id)->get()->unique('user_id');
             foreach ($leaderboard as $board) {
                 $kidDetails = User::with('kids.school')->find($board->kid->parent_id);
-                $kidDetails['total_points'] = GamesLeaderboard::where('user_id', $board->user_id)->sum('total_points');
-                $kidDetails['total_time'] = GamesLeaderboard::where('user_id', $board->user_id)->sum('total_time');
+                $kidDetails['total_points'] = GamesLeaderboard::where('user_id', $board->user_id)->where('game_night_id', $game_night->id)->sum('total_points');
+                $kidDetails['total_time'] = GamesLeaderboard::where('user_id', $board->user_id)->where('game_night_id', $game_night->id)->sum('total_time');
+                array_push($kids, $kidDetails);
+            }
+            // $leaderboard = GamesLeaderboard::all()->unique('user_id');
+            // foreach ($leaderboard as $kid) {
+            //     $kidDetails = User::with('kids.school')->find($kid->user_id);
+            //     $kidDetails['total_points'] = GamesLeaderboard::where('user_id', $kid->user_id)->sum('total_points');
+            //     $kidDetails['total_time'] = GamesLeaderboard::where('user_id', $kid->user_id)->sum('total_time');
+            //     array_push($kids, $kidDetails);
+            // }
+        } else {
+            // Get Latest Game Night
+            $game_night = GameNight::latest()->first();
+            $leaderboard = GamesLeaderboard::where('game_night_id', $game_night->id)->get()->unique('user_id');
+            foreach ($leaderboard as $board) {
+                $kidDetails = User::with('kids.school')->find($board->kid->parent_id);
+                $kidDetails['total_points'] = GamesLeaderboard::where('user_id', $board->user_id)->where('game_night_id', $game_night->id)->sum('total_points');
+                $kidDetails['total_time'] = GamesLeaderboard::where('user_id', $board->user_id)->where('game_night_id', $game_night->id)->sum('total_time');
                 array_push($kids, $kidDetails);
             }
         }
@@ -683,19 +722,23 @@ class GamesController extends Controller
 
     public function school_leaderboard($id)
     {
+        // Get Latest Game Night
+        $game_night = GameNight::latest()->first();
+
         $leaderboard = GamesLeaderboard::with('kid')->whereHas(
                         'kid', function($query) use ($id) {
                                 $query->where('school_id', $id);
                             }
                         )
+                        ->where('game_night_id', $game_night->id)
                         ->get()
                         ->unique('kid_id');
 
         $kids = [];
         foreach ($leaderboard as $kid) {
             $kidDetails = Kid::with('school')->find($kid->kid_id);
-            $kidDetails['total_points'] = GamesLeaderboard::where('kid_id', $kid->id)->sum('total_points');
-            $kidDetails['total_time'] = GamesLeaderboard::where('kid_id', $kid->id)->sum('total_time');
+            $kidDetails['total_points'] = GamesLeaderboard::where('game_night_id', $game_night->id)->where('kid_id', $kid->id)->sum('total_points');
+            $kidDetails['total_time'] = GamesLeaderboard::where('game_night_id', $game_night->id)->where('kid_id', $kid->id)->sum('total_time');
             array_push($kids, $kidDetails);
         }
 
