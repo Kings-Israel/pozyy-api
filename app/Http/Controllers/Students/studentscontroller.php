@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Video\{Video,Channel};
 use App\Kid;
 use App\KidPerformance;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Grade;
 use App\School;
 use Illuminate\Support\Facades\Validator;
@@ -118,7 +118,8 @@ class studentscontroller extends Controller
 
     public function choose_between_student(Request $request)
     {
-        $kid = Kid::where('id', $request->student_id)->with('parent')->first();
+        $kid = Kid::where('id', $request->student_id)->with('parent', 'school')->first();
+        
         return pozzy_httpOk($kid);
     }
 
@@ -143,6 +144,10 @@ class studentscontroller extends Controller
         }
 
         $school = School::where('school_register_id', $request->code)->first();
+
+        if (!$school) {
+            return pozzy_httpNotFound('Invalid school code');
+        }
 
         $kid = Kid::find($request->kid_id);
 
