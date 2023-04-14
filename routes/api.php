@@ -66,7 +66,7 @@ Route::group(['middleware' => 'jwt.auth'], function ($router) {
     Route::delete('/trivia/question/{id}/delete', 'GamesController@deleteTriviaQuestion');
 
     Route::get('/trivia/{id}/question/new', 'GamesController@getNewTriviaQuestion');
-    Route::post('/trivia/save', 'GamesController@saveSolvedTriviaQuestion');
+    Route::post('/trivia/save', 'GamesController@saveSolvedTriviaQuestion')->middleware('throttle:200,1');
 
     // User Game Night
     Route::get('/game-nights', [GameNightController::class, 'getGameNights']);
