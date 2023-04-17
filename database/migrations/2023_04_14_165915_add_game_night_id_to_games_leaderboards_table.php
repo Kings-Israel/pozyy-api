@@ -14,7 +14,7 @@ class AddGameNightIdToGamesLeaderboardsTable extends Migration
     public function up()
     {
         Schema::table('games_leaderboards', function (Blueprint $table) {
-            $table->foreignId('game_night_id')->nullable()->references('id')->on('users')->onDelete(null)->cascadeOnUpdate();
+            $table->foreignId('game_night_id')->nullable()->references('id')->on('game_nights')->onDelete(null)->cascadeOnUpdate();
         });
     }
 
