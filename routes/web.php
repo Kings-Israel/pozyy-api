@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\JambopayPaymentController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -32,16 +35,12 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 
-Route::get('/config-cache', function() {
-    $execute = Artisan::call('config:cache');
-    return '<h1>Cache facade value cleared</h1>';
+Route::get('/jambopay/{user_id}/{type}/{id}', function($user_id, $type, $id) {
+    return view('jambopay')->with([
+        'id' => $id,
+        'type' => $type,
+        'user_id' => $user_id,
+        'url' => route('jambopay.checkout'),
+    ]);
 });
 
-Route::get('route-clear', function() {
-    $execute = Artisan::call('route:clear');
-    return '<h1>Routes cached</h1>';
-});
-
-Route::get('/store', function() {
-    Artisan::call('storage:link');
-});

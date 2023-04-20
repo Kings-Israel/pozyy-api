@@ -51,4 +51,10 @@ return [
         'query_url_live' => env('MPESA_QUERY_URL_LIVE'),
      ],
 
+     'jambopay' => [
+        'url' => env('JAMBOPAY_ENV') === 'LIVE' ? env('JAMBOPAY_LIVE_URL') : env('JAMBOPAY_TEST_URL'),
+        'username' => env('JAMBOPAY_ENV') === 'LIVE' ? env('JAMBOPAY_USERNAME') :  env('JAMBOPAY_TEST_USERNAME'),
+        'password' => env('JAMBOPAY_ENV') === 'LIVE' ? env('JAMBOPAY_PASSWORD') : env('JAMBOPAY_TEST_PASSWORD'),
+        'client_key' => env('JAMBOPAY_CLIENT_KEY'),
+    ],
 ];

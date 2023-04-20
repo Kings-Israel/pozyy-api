@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GamesController;
 use App\Http\Controllers\PozyyTvController;
 use App\Http\Controllers\GameNightController;
+use App\Http\Controllers\JambopayPaymentController;
 
 Route::resource('/blogs', 'BlogController');
 Route::post('/blogs/update', 'BlogController@updateBlog');
@@ -201,7 +202,15 @@ Route::group(['middleware' => 'jwt.auth'], function ($router) {
         Route::post('/{id}/update', [PozyyTvController::class, 'adminUpdateVideo']);
         Route::delete('/{id}/delete', [PozyyTvController::class, 'delete']);
     });
+
+    //Jambopay
 });
+
+Route::post('jambopay/pay', [JambopayPaymentController::class, 'getAccessToken'])->name('jambopay.checkout');
+Route::post('/jambopay/callback', [JambopayPaymentController::class, 'callback'])->name('jambopay.callback');
+Route::post('/jambopay/cancel', function() {
+    return view('jambopay-cancel');
+})->name('jambopay.cancel');
 
 Route::post('/add/school', 'schoolcontroller@add_school');
 
