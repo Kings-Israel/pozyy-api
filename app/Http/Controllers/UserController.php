@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use Carbon\Carbon;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
-
-
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -41,15 +41,11 @@ class UserController extends Controller
             'username' => 'required|unique:users',
             'email' => 'required|email|unique:users',
             'phone_number' => 'required|unique:users',
-            'role_id' => 'required'
-            // 'password' => 'required',
+            'password' => 'required',
         ]);
 
         if ($validatedData->fails()){
-            return response()->json([
-                'message' => "invalid data",
-                'errors' =>[$validatedData->messages()]
-            ], 400);
+            return response()->json($validatedData->messages(), 422);
         }
 
         $user = new User();
@@ -58,16 +54,16 @@ class UserController extends Controller
         $user->lname = $request->lname;
         $user->email = $request->email;
         $user->phone_number = $request->phone_number;
-        $user->password = bcrypt(123456);
+        $user->password = bcrypt($request->password);
         $user->save();
 
-        $role = Role::where('id', $request->role_id)->first();
         //attach user role
-        $user->assignRole($role->name);
+        $user->assignRole('parent');
         // $user->revokePermissionTo('edit articles');
 
         return response()->json([
             "success"=>true,
+            "user" => $user,
         ], 200);
     }
 
@@ -78,8 +74,8 @@ class UserController extends Controller
             'fname' => 'required',
             'lname' => 'required',
             'username' => 'required',
-            'email' => 'required|email',
-            'phone_number' => 'required',
+            'email' => 'required|email|unique:user,email,except,id',
+            'phone_number' => 'required|unique:users,phone_number',
             // 'role_id' => 'required'
             // 'password' => 'required',
         ]);
@@ -125,6 +121,7 @@ class UserController extends Controller
 
         return response()->json([
             "success"=>true,
+            'user' => $user
         ], 200);
     }
 
@@ -138,13 +135,18 @@ class UserController extends Controller
         }
         if ($user){
             $user->update([
-                'status'=>false,
-                'updated_at'=>Carbon::now()
+                'status'=> false,
+                'updated_at'=> Carbon::now()
             ]);
-            return redirect()->back()->with('success', $user->fname.' has successfully been blocked from accessing the Taji web portal');
+            return response()->json([
+                'user' => $user,
+                'message' => 'User account suspended'
+            ]);
         }
         else{
-            return redirect()->back()->with('danger', 'Request declined, user not found.');
+            return response()->json([
+                'message' => 'User not found'
+            ]);
         }
     }
 

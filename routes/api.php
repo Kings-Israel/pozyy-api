@@ -125,6 +125,7 @@ Route::group(['middleware' => 'jwt.auth'], function ($router) {
     Route::resource('users', 'UserController');
     Route::get('system-users', 'UserController@system_users');
     Route::get('app-users', 'UserController@app_users');
+    Route::post('user/add', 'UserController@store');
     Route::get('block/{id}', 'UserController@block_user');
     Route::get('unblock/{id}', 'UserController@unblock_user');
 
