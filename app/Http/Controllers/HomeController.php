@@ -36,8 +36,11 @@ class HomeController extends Controller
     // Controllers for the admin dashboard
     public function getAppUsers()
     {
-        $users = User::get()->count();
-        return pozzy_httpOk($users - 2);
+        $admins = ['admin@deveint.com', 'admin@pozzy.com'];
+
+        $users = User::with('kids')->whereNotIn('email', $admins)->get();
+
+        return pozzy_httpOk($users);
     }
 
     public function getGamesCount()
