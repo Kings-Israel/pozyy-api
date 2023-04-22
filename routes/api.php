@@ -50,6 +50,7 @@ Route::group(['middleware' => 'jwt.auth'], function ($router) {
     Route::post('/game-night/create', [GameNightController::class, 'store']);
     Route::post('/game-night/{id}/update', [GameNightController::class, 'update']);
     Route::delete('/game-night/{id}/delete', [GameNightController::class, 'destroy']);
+    Route::get('game-nights/trashed', [GameNightController::class, 'trashed']);
 
     Route::post('/game/to/game-night', [GamesController::class, 'addToGameNight']);
     Route::post('/game/from/game-night', [GamesController::class, 'removeFromGameNight']);
@@ -72,6 +73,7 @@ Route::group(['middleware' => 'jwt.auth'], function ($router) {
     // User Game Night
     Route::get('/game-nights', [GameNightController::class, 'getGameNights']);
     Route::get('/game-night/categories', [GameNightController::class, 'getCategories']);
+    Route::get('/game-night/{id}', [GameNightController::class, 'getGameNight']);
 
     Route::get('/game-night/{id}/games', [GameNightController::class, 'getGameNightGames']);
 
@@ -203,9 +205,11 @@ Route::group(['middleware' => 'jwt.auth'], function ($router) {
         Route::delete('/{id}/delete', [PozyyTvController::class, 'delete']);
     });
 
-    //Jambopay
+    // Payments
+    Route::get('/payments', PaymentsController::class);
 });
 
+//Jambopay
 Route::post('jambopay/pay', [JambopayPaymentController::class, 'getAccessToken'])->name('jambopay.checkout');
 Route::post('/jambopay/callback', [JambopayPaymentController::class, 'callback'])->name('jambopay.callback');
 Route::post('/jambopay/cancel', function() {

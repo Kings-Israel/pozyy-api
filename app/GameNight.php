@@ -3,9 +3,11 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class GameNight extends Model
 {
+    use SoftDeletes;
     /**
      * The attributes that aren't mass assignable.
      *
@@ -30,7 +32,7 @@ class GameNight extends Model
      */
     public function users()
     {
-        return $this->hasManyThrough(User::class, UserGameNight::class);
+        return $this->hasManyThrough(User::class, UserGameNight::class, 'id', 'id', 'id', 'user_id');
     }
 
     /**

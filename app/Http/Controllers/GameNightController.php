@@ -11,6 +11,7 @@ use App\MpesaPayment;
 use App\UserGameNight;
 use App\SpotDifference;
 use App\GameNightCategory;
+use App\GamesLeaderboard;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\MpesaPaymentController;
+use App\User;
 
 class GameNightController extends Controller
 {
@@ -34,7 +36,28 @@ class GameNightController extends Controller
                                         $query->where('mpesa_receipt_number', '!=', null);
                                     }
                                 ])
+                                ->orderBy('created_at', 'DESC')
                                 ->get();
+
+        return pozzy_httpOk($game_nights);
+    }
+
+    public function trashed()
+    {
+        $game_nights = GameNight::with([
+                            'triviaGames.triviaQuestions',
+                            'twoPicsGames',
+                            'spotDifferencesGames',
+                            'category'
+                        ])
+                        ->withCount([
+                            'payments' => function($query) {
+                                $query->where('mpesa_receipt_number', '!=', null);
+                            }
+                        ])
+                        ->orderBy('created_at', 'DESC')
+                        ->onlyTrashed()
+                        ->get();
 
         return pozzy_httpOk($game_nights);
     }
@@ -120,16 +143,16 @@ class GameNightController extends Controller
     {
         $game_night = GameNight::find($id);
 
-        $trivias = Trivia::where('game_night_id', $id)->get();
-        $trivias->each(fn ($trivia) => $trivia->update(['game_night_id' => NULL]));
+        // $trivias = Trivia::where('game_night_id', $id)->get();
+        // $trivias->each(fn ($trivia) => $trivia->update(['game_night_id' => NULL]));
 
-        $two_pics_games = TwoPicsGame::where('game_night_id',$id)->get();
-        $two_pics_games->each(fn ($game) => $game->update(['game_night_id' => NULL]));
+        // $two_pics_games = TwoPicsGame::where('game_night_id',$id)->get();
+        // $two_pics_games->each(fn ($game) => $game->update(['game_night_id' => NULL]));
 
-        $spot_differences = SpotDifference::where('game_night_id', $id)->get();
-        $spot_differences->each(fn ($spot_difference) => $spot_difference->update(['game_night_id' => NULL]));
+        // $spot_differences = SpotDifference::where('game_night_id', $id)->get();
+        // $spot_differences->each(fn ($spot_difference) => $spot_difference->update(['game_night_id' => NULL]));
 
-        Storage::disk('game-night')->delete('poster/'.$game_night->poster);
+        // Storage::disk('game-night')->delete('poster/'.$game_night->poster);
 
         $game_night->delete();
 
@@ -351,5 +374,22 @@ class GameNightController extends Controller
         }
 
         return response()->json(['message' => '', 'data' => $game_nights], 200);
+    }
+
+    public function getGameNight($id)
+    {
+        $game_nights = GameNight::with('triviaGames.triviaQuestions', 'twoPicsGames', 'spotDifferencesGames', 'category', 'users')->find($id);
+
+        $kids = [];
+        $leaderboard = GamesLeaderboard::where('game_night_id', $game_nights->id)->get()->unique('user_id');
+        foreach ($leaderboard as $board) {
+            $kidDetails = User::with('kids.school')->find($board->kid->parent_id);
+            $kidDetails['total_points'] = GamesLeaderboard::where('user_id', $board->user_id)->where('game_night_id', $game_nights->id)->sum('total_points');
+            $kidDetails['total_time'] = GamesLeaderboard::where('user_id', $board->user_id)->where('game_night_id', $game_nights->id)->sum('total_time');
+            array_push($kids, $kidDetails);
+        }
+        $game_nights['leaderboard'] = $kids;
+
+        return pozzy_httpOk($game_nights);
     }
 }
