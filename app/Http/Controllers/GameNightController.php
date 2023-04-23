@@ -378,7 +378,7 @@ class GameNightController extends Controller
 
     public function getGameNight($id)
     {
-        $game_nights = GameNight::with('triviaGames.triviaQuestions', 'twoPicsGames', 'spotDifferencesGames', 'category', 'users')->find($id);
+        $game_nights = GameNight::with('triviaGames.triviaQuestions', 'twoPicsGames', 'spotDifferencesGames', 'category', 'users.kids')->withTrashed()->find($id);
 
         $kids = [];
         $leaderboard = GamesLeaderboard::where('game_night_id', $game_nights->id)->get()->unique('user_id');

@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Cart;
+use App\Helpers\NumberGenerator;
+use App\JambopayPayment;
 use App\MpesaPayment;
 use App\ShopItem;
 use App\UserShopItems;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class CartController extends Controller
@@ -23,9 +26,13 @@ class CartController extends Controller
 
     public function addToCart(Request $request)
     {
-        $this->validate($request, [
-            'item_id' => ['required']
+        $validator = Validator::make($request->all(), [
+            'item_id' => 'required'
         ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->messages(), 422);
+        }
 
         $item = ShopItem::find($request->item_id);
 
@@ -43,9 +50,13 @@ class CartController extends Controller
 
     public function deleteFromCart(Request $request)
     {
-        $this->validate($request, [
-            'item_id' => ['required']
+        $validator = Validator::make($request->all(), [
+            'item_id' => 'required'
         ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->messages(), 422);
+        }
 
         $item = Cart::where('user_id', auth()->user()->id)->where('id', $request->item_id)->first();
 
@@ -59,14 +70,17 @@ class CartController extends Controller
 
     public function deleteItemsFromCart(Request $request)
     {
-        $this->validate($request, [
+        $validator = Validator::make($request->all(), [
             'items' => ['required', 'array']
-        ], [
+        ],[
             'items' => 'Please select item(s) to delete'
         ]);
 
+        if ($validator->fails()) {
+            return response()->json($validator->messages(), 422);
+        }
+
         collect($request->items)->each(function($item) {
-            info($item);
             $cartItem = Cart::where('user_id', auth()->user()->id)->where('id', $item)->first();
 
             if ($cartItem) {
@@ -77,11 +91,92 @@ class CartController extends Controller
         return pozzy_httpOk('Items removed from cart');
     }
 
+    public function jambopayCheckout(Request $request)
+    {
+        info($request->all());
+
+        $validator = Validator::make($request->all(), [
+            'items' => ['required', 'array'],
+            'user_id' => ['required']
+        ],[
+            'items' => 'Please select item(s) to checkout',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->messages(), 422);
+        }
+
+        // Get total amount from items chosen
+        $totalAmount = 0;
+        foreach ($request->items as $item) {
+            $cartItem = Cart::find($item);
+            $shopItem = ShopItem::find($cartItem->shop_item_id);
+            $totalAmount += $shopItem->price;
+
+            $invoice_number = NumberGenerator::generateNumber(JambopayPayment::class, 'invoice_id');
+
+            JambopayPayment::create([
+                'invoice_id' => $invoice_number,
+                'user_id' => $request->user_id,
+                'jambopay_payable_id' => $item,
+                'jambopay_payable_type' => ShopItem::class,
+            ]);
+
+            UserShopItems::create([
+                'user_id' => $request->user_id,
+                'shop_item_id' => $item,
+                'mpesa_checkout_string' => $invoice_number,
+            ]);
+        }
+
+        $token = JambopayPaymentController::accessToken();
+
+        return response()->json([
+            'success' => true,
+            'invoice_id' =>$invoice_number,
+            'access_token' => $token,
+            'amount' => $totalAmount,
+            'client_key' => config('services.jambopay.client_key'),
+            'callback_url' => route('shop.jambopay.checkout.callback'),
+            'cancel_url' => route('jambopay.cancel'),
+        ], 200);
+    }
+
+    public function jambopayCallback(Request $request)
+    {
+        $payments = JambopayPayment::where('invoice_id', $request->invoice_id)->get();
+
+        if ($request->has('receipt') && $request->receipt != 'null') {
+            $payments->each(function($payment) use ($request) {
+                $payment->update([
+                    'receipt' => $request->receipt,
+                ]);
+
+            });
+        }
+
+        $user_shop_items = UserShopItems::where('mpesa_checkout_string', $request->invoice_id)->get();
+
+        $user_shop_items->each(function($item) {
+            $item->update([
+                'isPurchased' => true
+            ]);
+        });
+
+        return response()->json(['message' => 'Payment successfull'], 200);
+    }
+
     public function checkout(Request $request)
     {
-        $this->validate($request, [
-            'items' => ['required', 'array'],
+        $validator = Validator::make($request->all(), [
+            'items' => ['required', 'array']
+        ],[
+            'items' => 'Please select item(s) to checkout'
         ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->messages(), 422);
+        }
 
         // Get total amount from items chosen
         $totalAmount = 0;

@@ -24,4 +24,12 @@ class GamesLeaderboard extends Model
     {
         return $this->belongsTo(Kid::class, 'kid_id', 'id');
     }
+
+    /**
+     * Get the gameNight that owns the GamesLeaderboard
+     */
+    public function gameNight(): BelongsTo
+    {
+        return $this->belongsTo(GameNight::class);
+    }
 }

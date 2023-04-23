@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Validator;
 class JambopayPaymentController extends Controller
 {
     //jambopay access token
-    public function accessToken()
+    public static function accessToken()
     {
         $url = config('services.jambopay.url');
         $curl = curl_init();
@@ -76,7 +76,7 @@ class JambopayPaymentController extends Controller
                 'event_id' => $event->id,
                 'mpesa_checkout_request_id' => $invoice_number,
             ]);
-        } else {
+        } elseif ($request->type === 'GameNight') {
             $game_night = GameNight::find($request->id);
             $type = GameNight::class;
             $amount = $game_night->price;

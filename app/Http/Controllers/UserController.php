@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\User;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
@@ -65,6 +66,13 @@ class UserController extends Controller
             "success"=>true,
             "user" => $user,
         ], 200);
+    }
+
+    public function show($id): JsonResponse
+    {
+        $user = User::with('leaderboard.gameNight', 'cartItems.shopItem', 'eventUserTickets.event', 'purchasedItems.shopItem', 'kids.school')->find($id);
+
+        return pozzy_httpOk($user);
     }
 
 
