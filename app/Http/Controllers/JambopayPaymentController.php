@@ -105,11 +105,11 @@ class JambopayPaymentController extends Controller
     public function callback(Request $request)
     {
         info($request->all());
-        if ($request->status === 'SUCCESS') {
-            $payment = JambopayPayment::where('invoice_id', $request->Order_id)->first();
+        if ($request->Status === 'SUCCESS') {
+            $payment = JambopayPayment::where('invoice_id', $request->Order_Id)->first();
 
             $payment->update([
-                'receipt' => $request->receipt,
+                'receipt' => $request->Receipt,
             ]);
 
             if($payment->jambopay_payable_type === 'App\Event') {
