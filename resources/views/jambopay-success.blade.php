@@ -42,9 +42,10 @@
 
     .leftright{
       height: 4px;
-      width: 50px;
+      width: 25px;
       position: absolute;
       margin-top: 24px;
+      margin-left: 10px;
       background-color: #F4A259;
       border-radius: 2px;
       transform: rotate(45deg);
@@ -55,7 +56,8 @@
       height: 4px;
       width: 50px;
       position: absolute;
-      margin-top: 24px;
+      margin-top: 15px;
+      margin-left: 21px;
       background-color: #F4A259;
       border-radius: 2px;
       transform: rotate(-45deg);
@@ -97,7 +99,7 @@
       <label class="close">close</label>
     </div>
     <div class="success-text">
-      <h3>The transaction was successfull.</h3>
+      <h3>The transaction was successful.</h3>
     </div>
   </div>
 </body>

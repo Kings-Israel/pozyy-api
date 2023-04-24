@@ -42,3 +42,7 @@ Route::get('/jambopay/{user_id}/{type}/{id}', function($user_id, $type, $id) {
     ]);
 });
 
+Route::get('/jambopay/success', function() {
+    return view('jambopay-success');
+});
+
