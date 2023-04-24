@@ -31,7 +31,7 @@ class GamesController extends Controller
 
     public function getAllTrivias()
     {
-        $trivias = Trivia::with(['triviaCategory', 'gameNight'])->withCount('triviaQuestions')->get();
+        $trivias = Trivia::with(['triviaCategory', 'gameNight' => fn($q) => $q->withTrashed()])->withCount('triviaQuestions')->get();
 
         return pozzy_httpOk($trivias);
     }
@@ -691,7 +691,7 @@ class GamesController extends Controller
         if (auth()->user()->getRoleNames()[0] === 'admin') {
             // Get Latest Game Night
             $game_night = GameNight::latest()->first();
-            
+
             $leaderboard = GamesLeaderboard::where('game_night_id', $game_night->id)->get()->unique('user_id');
             foreach ($leaderboard as $board) {
                 $kidDetails = User::with('kids.school')->find($board->kid->parent_id);

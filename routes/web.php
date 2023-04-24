@@ -41,8 +41,3 @@ Route::get('/jambopay/{user_id}/{type}/{id}', function($user_id, $type, $id) {
         'url' => route('jambopay.checkout'),
     ]);
 });
-
-Route::get('/jambopay/success', function() {
-    return view('jambopay-success');
-});
-
