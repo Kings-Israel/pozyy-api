@@ -97,7 +97,7 @@
       <label class="close">close</label>
     </div>
     <div class="success-text">
-      <h3>The transaction failed or was cancelled.</h3>
+      <h3>The transaction was successfull.</h3>
     </div>
   </div>
 </body>

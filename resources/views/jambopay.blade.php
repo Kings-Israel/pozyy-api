@@ -82,7 +82,6 @@
                _token: _token
             },
             success:function(response){
-                console.log(response)
                if(response.success){
                   const merchantDetails = {
                         OrderId: response.invoice_id,
@@ -93,8 +92,7 @@
                         BusinessEmail: 'david@pozyy.com',
                         CancelledUrl: response.cancel_url,
                         CallBackUrl: response.callback_url,
-                        // CallBackUrl: baseUrl+'/api/jambopay/callback',
-                        Description: 'Checkout description',
+                        Description: 'Jambopay Payment',
                         Checksum: 'sample checksum',
                         PhoneNumber: CustomerPhone,
                         StoreName: 'POZYY GROUP LIMITED',

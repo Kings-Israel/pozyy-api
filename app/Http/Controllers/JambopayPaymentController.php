@@ -104,26 +104,29 @@ class JambopayPaymentController extends Controller
 
     public function callback(Request $request)
     {
-        $payment = JambopayPayment::where('invoice_id', $request->invoice_id)->first();
+        info($request->all());
+        if ($request->status === 'Success') {
+            $payment = JambopayPayment::where('invoice_id', $request->order_id)->first();
 
-        if ($request->has('receipt') && $request->receipt != 'null') {
             $payment->update([
                 'receipt' => $request->receipt,
             ]);
-        }
 
-        if($payment->jambopay_payable_type === 'App\Event') {
-            $eventUserTicket = EventUserTicket::where('mpesa_checkout_request_id', $request->invoice_id)->first();
-            $eventUserTicket->update([
-                'isPaid' => true,
-            ]);
+            if($payment->jambopay_payable_type === 'App\Event') {
+                $eventUserTicket = EventUserTicket::where('mpesa_checkout_request_id', $request->invoice_id)->first();
+                $eventUserTicket->update([
+                    'isPaid' => true,
+                ]);
+            } else {
+                UserGameNight::create([
+                    'user_id' => $payment->user_id,
+                    'game_night_id' => $payment->jambopay_payable_id
+                ]);
+            }
+
+            return view('jambopay-success');
         } else {
-            UserGameNight::create([
-                'user_id' => $payment->user_id,
-                'game_night_id' => $payment->jambopay_payable_id
-            ]);
+            return view('jambopay-cancel');
         }
-
-        return response()->json(['message' => 'Payment successfull'], 200);
     }
 }
