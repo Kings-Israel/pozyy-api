@@ -6,6 +6,7 @@ use App\Http\Controllers\GamesController;
 use App\Http\Controllers\PozyyTvController;
 use App\Http\Controllers\GameNightController;
 use App\Http\Controllers\JambopayPaymentController;
+use App\Http\Controllers\Video\videocontroller;
 
 Route::resource('/blogs', 'BlogController');
 Route::post('/blogs/update', 'BlogController@updateBlog');
@@ -234,3 +235,5 @@ Route::get('/mobile/media/sections/thumbnails', 'MobileMediaController@getSectio
 Route::post('/mobile/media/thumbnail/update', 'MobileMediaController@updateThumbnail');
 
 Route::get('/banks', [\App\Http\Controllers\schoolcontroller::class, 'banks']);
+
+Route::post('/videos/delete', [videocontroller::class, 'deleteUnusedVideos']);

@@ -104,7 +104,6 @@ class JambopayPaymentController extends Controller
 
     public function callback(Request $request)
     {
-        info($request->all());
         if ($request->Status === 'SUCCESS') {
             $payment = JambopayPayment::where('invoice_id', $request->Order_Id)->first();
 

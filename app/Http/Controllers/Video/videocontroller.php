@@ -65,7 +65,7 @@ class videocontroller extends Controller
             Storage::disk('videos')->delete('thumbnails/'.$thumbnail);
 
             $video->thumbnail = config('services.app_url.url').'/storage/videos/thumbnails/'.pathinfo($request->thumbnail->store('thumbnails', 'videos'), PATHINFO_BASENAME);
-            
+
             // $exploded = explode(',', $request->thumbnail);
             // $decoded = base64_decode($exploded[1]);
             // if(Str::contains($exploded[0], 'jpeg'))
@@ -422,5 +422,23 @@ class videocontroller extends Controller
         $channels = Subchannel::withCount('videos', 'channel')->get();
 
         return pozzy_httpOk($channels);
+    }
+
+    public function deleteUnusedVideos(Request $request)
+    {
+        $videos = Video::all()->pluck('video_url');
+        // info($videos);
+        foreach(file($request->file('videos')) as $line) {
+            // info(explode(' ', $line));
+            $lines = explode(' ', $line);
+            foreach($lines as $line) {
+                if ($line !== '') {
+                    // info($line);
+                    if ($videos->contains($line)) {
+                        info($line);
+                    }
+                }
+            }
+        }
     }
 }
