@@ -434,8 +434,9 @@ class videocontroller extends Controller
             foreach($lines as $line) {
                 if ($line !== '') {
                     // info($line);
-                    if ($videos->contains($line)) {
+                    if (!$videos->contains($line)) {
                         info($line);
+                        Storage::disk('videos')->delete('video/'.$line);
                     }
                 }
             }
