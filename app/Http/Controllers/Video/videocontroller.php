@@ -160,15 +160,8 @@ class videocontroller extends Controller
     public function school_show_videos()
     {
         $user = Auth::user();
-        if(Auth::user()->getRoleNames()[0] == 'teacher') {
-            $video = Video::where([['user_id', $user->id]])->with(['stream'])->get();
-            return pozzy_httpOk($video);
-        } else if(Auth::user()->getRoleNames()[0] == 'school') {
-            $video = Video::where('school_id', $user->school_id)->with(['user'])->get();
-            return pozzy_httpOk($video);
-        } else {
-            return pozzy_httpForbidden('Oops, you have no right to perform this operation');
-        }
+        $video = Video::where('school_id', $user->school_id)->with(['user'])->get();
+        return pozzy_httpOk($video);
     }
     public function school_count_videos()
     {
@@ -422,24 +415,5 @@ class videocontroller extends Controller
         $channels = Subchannel::withCount('videos', 'channel')->get();
 
         return pozzy_httpOk($channels);
-    }
-
-    public function deleteUnusedVideos(Request $request)
-    {
-        $videos = Video::all()->pluck('video_url');
-        // info($videos);
-        foreach(file($request->file('videos')) as $line) {
-            // info(explode(' ', $line));
-            $lines = explode(' ', $line);
-            foreach($lines as $line) {
-                if ($line !== '') {
-                    // info($line);
-                    if (!$videos->contains($line)) {
-                        info($line);
-                        Storage::disk('videos')->delete('video/'.$line);
-                    }
-                }
-            }
-        }
     }
 }

@@ -718,7 +718,7 @@ class GamesController extends Controller
     public function school_leaderboard($id)
     {
         // Get Latest Game Night
-        $game_night = GameNight::latest()->first();
+        $game_night = GameNight::latest()->withTrashed()->first();
 
         $leaderboard = GamesLeaderboard::with('kid')->whereHas(
                         'kid', function($query) use ($id) {
@@ -748,7 +748,16 @@ class GamesController extends Controller
 
             // Get game nights where there's a student from the school registered in
             // $user_game_nights = UserGameNight::withCount('user')->with('gameNight')->whereIn('user_id', $users)->get();
-            $user_game_nights = UserGameNight::withCount('user')->with('gameNight')->whereIn('user_id', $users)->get()->groupBy('game_night_id');
+            $user_game_nights = UserGameNight::withCount([
+                                                        'user' => function($query) {
+                                                            $query->withTrashed();
+                                                        }])
+                                            ->with(['gameNight' => function($query) {
+                                                $query->withTrashed();
+                                            }])
+                                            ->whereIn('user_id', $users)
+                                            ->get()
+                                            ->groupBy('game_night_id');
         }
 
         return pozzy_httpOk(['leaderboard' => $kids, 'game_night_data' => $user_game_nights]);

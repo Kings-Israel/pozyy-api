@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
@@ -11,7 +12,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
-    use HasRoles;
+    use HasRoles, SoftDeletes;
 
     //To instruct spatie roles, to use guard name api, instead of default Web
     protected $guard_name = 'api';

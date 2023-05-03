@@ -130,8 +130,11 @@ Route::group(['middleware' => 'jwt.auth'], function ($router) {
     Route::get('system-users', 'UserController@system_users');
     Route::get('app-users', 'UserController@app_users');
     Route::post('user/add', 'UserController@store');
+    Route::delete('user/{id}/delete', 'UserController@destroy');
     Route::get('block/{id}', 'UserController@block_user');
     Route::get('unblock/{id}', 'UserController@unblock_user');
+
+    Route::delete('user/{id}', 'UserController@deleteAccount');
 
     //Roles & permissions
     Route::resource('roles', 'RoleController');
@@ -235,5 +238,3 @@ Route::get('/mobile/media/sections/thumbnails', 'MobileMediaController@getSectio
 Route::post('/mobile/media/thumbnail/update', 'MobileMediaController@updateThumbnail');
 
 Route::get('/banks', [\App\Http\Controllers\schoolcontroller::class, 'banks']);
-
-Route::post('/videos/delete', [videocontroller::class, 'deleteUnusedVideos']);

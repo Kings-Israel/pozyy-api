@@ -123,9 +123,17 @@ class UserController extends Controller
 
     public function destroy($id)
     {
+        info($id);
         $user = User::where('id', $id)->first();
         $user->roles()->detach();
-        $user = User::destroy($id);
+        $user = User::find($id);
+        $kids = $user->kids;
+
+        if ($kids->count() > 0) {
+            $kids->each(fn ($kid) => $kid->delete());
+        }
+
+        $user->delete();
 
         return response()->json([
             "success"=>true,

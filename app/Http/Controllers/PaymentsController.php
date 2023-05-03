@@ -18,9 +18,25 @@ class PaymentsController extends Controller
     {
         // Get Game night payments
         // Mpesa payments
-        $mpesa_payments = MpesaPayment::with('user', 'mpesaPayable')->where('checkout_request_id', '!=', NULL)->orderBy('created_at', 'DESC')->get();
+        $mpesa_payments = MpesaPayment::with([
+                                            'mpesaPayable',
+                                            'user' => function($query) {
+                                                $query->withTrashed();
+                                            }
+                                        ])
+                                        ->where('checkout_request_id', '!=', NULL)
+                                        ->orderBy('created_at', 'DESC')
+                                        ->get();
         // Jambopay Payments
-        $jambopay_payments = JambopayPayment::with('user', 'jambopayPayable')->where('receipt', '!=', NULL)->orderBy('created_at', 'DESC')->get();
+        $jambopay_payments = JambopayPayment::with([
+                                                'jambopayPayable',
+                                                'user' => function($query) {
+                                                    $query->withTrashed();
+                                                }
+                                            ])
+                                            ->where('receipt', '!=', NULL)
+                                            ->orderBy('created_at', 'DESC')
+                                            ->get();
 
         return pozzy_httpOk(['mpesa_payments' => $mpesa_payments, 'jambopay_payments' => $jambopay_payments]);
     }

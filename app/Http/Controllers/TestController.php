@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Test;
 use App\Models\TestCategory;
-use App\Http\Resources\Question as QuestionResource;
+use App\Http\Resources\Question;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -119,7 +119,7 @@ class TestController extends Controller
             'subject_id' => $test->subject->id,
             // 'topic_id' => $test->topic->id,
             'created_by' => $test->user->username,
-            "questions" => QuestionResource::collection($test->questions)
+            "questions" => Question::collection($test->questions)
         ];
         return response()->json([
             "test"=>$test_data,
