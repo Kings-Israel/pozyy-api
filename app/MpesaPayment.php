@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class MpesaPayment extends Model
 {
@@ -19,7 +20,7 @@ class MpesaPayment extends Model
 
     public function mpesaPayable()
     {
-        return $this->morphTo();
+        return $this->morphTo()->withoutGlobalScope(SoftDeletingScope::class);
     }
 }
 

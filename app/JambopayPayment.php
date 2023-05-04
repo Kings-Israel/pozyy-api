@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class JambopayPayment extends Model
 {
@@ -23,6 +24,6 @@ class JambopayPayment extends Model
 
     public function jambopayPayable()
     {
-        return $this->morphTo();
+        return $this->morphTo()->withoutGlobalScope(SoftDeletingScope::class);
     }
 }
