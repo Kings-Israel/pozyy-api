@@ -706,8 +706,8 @@ class GamesController extends Controller
             $leaderboard = GamesLeaderboard::where('game_night_id', $game_night->id)->get()->unique('user_id');
             foreach ($leaderboard as $board) {
                 $kidDetails = User::with('kids.school')->find($board->kid->parent_id);
-                $kidDetails['total_points'] = GamesLeaderboard::where('user_id', $board->user_id)->where('game_night_id', $game_night->id)->sum('total_points');
-                $kidDetails['total_time'] = GamesLeaderboard::where('user_id', $board->user_id)->where('game_night_id', $game_night->id)->sum('total_time');
+                $kidDetails['total_points'] = (string) GamesLeaderboard::where('user_id', $board->user_id)->where('game_night_id', $game_night->id)->sum('total_points');
+                $kidDetails['total_time'] = (string) GamesLeaderboard::where('user_id', $board->user_id)->where('game_night_id', $game_night->id)->sum('total_time');
                 array_push($kids, $kidDetails);
             }
         }

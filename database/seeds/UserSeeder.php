@@ -68,5 +68,20 @@ class UserSeeder extends Seeder
             ]);
             $user->assignRole('user');
         }
+
+        $check = \App\User::where('username', '=', 'parent-deveint')->first();
+        if (!$check){
+            $user = User::create([
+                'fname' => 'Parent',
+                'lname' => 'Deveint',
+                'username' => 'parent-deveint',
+                'email' => 'parent@deveint.com',
+                'phone_number' => '254725730021',
+                'password' => Hash::make('123456'),
+                'created_at' => \Carbon\Carbon::now(),
+                'updated_at' => \Carbon\Carbon::now(),
+            ]);
+            $user->assignRole('user');
+        }
     }
 }
