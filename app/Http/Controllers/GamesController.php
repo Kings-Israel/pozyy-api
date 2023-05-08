@@ -739,6 +739,9 @@ class GamesController extends Controller
             $kidDetails['total_points'] = GamesLeaderboard::where('game_night_id', $game_night->id)->where('kid_id', $kid->id)->sum('total_points');
             $kidDetails['total_time'] = GamesLeaderboard::where('game_night_id', $game_night->id)->where('kid_id', $kid->id)->sum('total_time');
             array_push($kids, $kidDetails);
+            $kids = array_values(Arr::sort($kids, function($value) {
+                return !$value['total_points'];
+            }));
         }
 
         $user_game_nights = null;
