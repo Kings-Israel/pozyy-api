@@ -76,12 +76,12 @@ class UserSeeder extends Seeder
                 'lname' => 'Deveint',
                 'username' => 'parent-deveint',
                 'email' => 'parent@deveint.com',
-                'phone_number' => '254725730021',
-                'password' => Hash::make('123456'),
+                'phone_number' => '254725730521',
+                'password' => Hash::make('password'),
                 'created_at' => \Carbon\Carbon::now(),
                 'updated_at' => \Carbon\Carbon::now(),
             ]);
-            $user->assignRole('user');
+            $user->assignRole('parent');
         }
     }
 }

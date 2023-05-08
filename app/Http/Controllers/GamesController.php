@@ -20,6 +20,7 @@ use App\User;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Arr;
 
 class GamesController extends Controller
 {
@@ -273,7 +274,7 @@ class GamesController extends Controller
         }
 
         GamesLeaderboard::create([
-            'user_id' => $kid->parent->id,
+            'user_id' => auth()->id(),
             'kid_id' => $kid->id,
             'total_points' => $points,
             'total_time' => (int) $question->duration - (int) $request->duration,
@@ -463,7 +464,7 @@ class GamesController extends Controller
         }
 
         GamesLeaderboard::create([
-            'user_id' => $kid->parent->id,
+            'user_id' => auth()->id(),
             'kid_id' => $kid->id,
             'total_points' => $points,
             'total_time' => (int) $answer->duration - (int) $request->duration,
@@ -473,7 +474,7 @@ class GamesController extends Controller
         ]);
 
         DB::table('users_games_played')->insert([
-            'user_id' => auth()->user()->id,
+            'user_id' => auth()->id(),
             'two_pics_games_id' => $answer->id,
             'created_at' => now(),
             'updated_at' => now(),
@@ -666,7 +667,7 @@ class GamesController extends Controller
         }
 
         GamesLeaderboard::create([
-            'user_id' => $kid->parent->id,
+            'user_id' => auth()->id(),
             'kid_id' => $kid->id,
             'total_points' => (int) $points,
             'total_time' => (int) $answer->duration - (int) $request->duration,
@@ -698,6 +699,9 @@ class GamesController extends Controller
                 $kidDetails['total_points'] = GamesLeaderboard::where('user_id', $board->user_id)->where('game_night_id', $game_night->id)->sum('total_points');
                 $kidDetails['total_time'] = GamesLeaderboard::where('user_id', $board->user_id)->where('game_night_id', $game_night->id)->sum('total_time');
                 array_push($kids, $kidDetails);
+                $kids = array_values(Arr::sort($kids, function($value) {
+                    return !$value['total_points'];
+                }));
             }
         } else {
             // Get Latest Game Night
