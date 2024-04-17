@@ -707,12 +707,14 @@ class GamesController extends Controller
             // Get Latest Game Night
             $game_night = GameNight::latest()->first();
 
-            $leaderboard = GamesLeaderboard::where('game_night_id', $game_night->id)->get()->unique('user_id');
-            foreach ($leaderboard as $board) {
-                $kidDetails = User::with('kids.school')->find($board->kid->parent_id);
-                $kidDetails['total_points'] = (string) GamesLeaderboard::where('user_id', $board->user_id)->where('game_night_id', $game_night->id)->sum('total_points');
-                $kidDetails['total_time'] = (string) GamesLeaderboard::where('user_id', $board->user_id)->where('game_night_id', $game_night->id)->sum('total_time');
-                array_push($kids, $kidDetails);
+	    if ($game_night) {
+	            $leaderboard = GamesLeaderboard::where('game_night_id', $game_night->id)->get()->unique('user_id');
+        	    foreach ($leaderboard as $board) {
+                	$kidDetails = User::with('kids.school')->find($board->kid->parent_id);
+	                $kidDetails['total_points'] = (string) GamesLeaderboard::where('user_id', $board->user_id)->where('game_night_id', $game_night->id)->sum('total_points');
+        	        $kidDetails['total_time'] = (string) GamesLeaderboard::where('user_id', $board->user_id)->where('game_night_id', $game_night->id)->sum('total_time');
+                	array_push($kids, $kidDetails);
+		}
             }
         }
 
