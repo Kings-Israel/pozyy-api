@@ -345,7 +345,7 @@ class GameNightController extends Controller
 
     public function getCreatorsChallenges()
     {
-        $game_nights = GameNight::with('triviaGames.triviaQuestions', 'twoPicsGames', 'spotDifferencesGames', 'category')->where('category_id', 2)->get();
+        $game_nights = GameNight::with('triviaGames.triviaQuestions', 'twoPicsGames', 'spotDifferencesGames', 'category')->whereHas('category', fn ($query) => $query->where('id', 2))->get();
 
         foreach ($game_nights as $key => $game_night) {
             if ($game_night->triviaGames) {
