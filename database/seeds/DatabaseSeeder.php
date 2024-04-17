@@ -18,5 +18,6 @@ class DatabaseSeeder extends Seeder
         $this->call(MobileMediaSeeder::class);
         $this->call(GameNightCategorySeeder::class);
         $this->call(GamesSeeder::class);
+        $this->call(BankSeeder::class);
     }
 }
