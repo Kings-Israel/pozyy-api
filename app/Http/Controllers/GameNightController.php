@@ -348,31 +348,31 @@ class GameNightController extends Controller
         // $game_nights = GameNight::with('triviaGames.triviaQuestions', 'twoPicsGames', 'spotDifferencesGames', 'category')->get();
         $game_nights = GameNight::all();
 
-        foreach ($game_nights as $key => $game_night) {
-            if ($game_night->triviaGames) {
-                foreach ($game_night->triviaGames as $trivia_game) {
-                    foreach ($trivia_game->triviaQuestions as $question) {
-                        $question['user_has_played'] = $question->userHasPlayed(auth()->user());
-                    }
-                }
-            }
-            if ($game_night->twoPicsGames) {
-                foreach ($game_night->twoPicsGames as $game) {
-                    $game['user_has_played'] = $game->userHasPlayed(auth()->user());
-                }
-            }
-            if ($game_night->spotDifferencesGames) {
-                foreach ($game_night->spotDifferencesGames as $game) {
-                    $game['user_has_played'] = $game->userHasPlayed(auth()->user());
-                }
-            }
+        // foreach ($game_nights as $key => $game_night) {
+        //     if ($game_night->triviaGames) {
+        //         foreach ($game_night->triviaGames as $trivia_game) {
+        //             foreach ($trivia_game->triviaQuestions as $question) {
+        //                 $question['user_has_played'] = $question->userHasPlayed(auth()->user());
+        //             }
+        //         }
+        //     }
+        //     if ($game_night->twoPicsGames) {
+        //         foreach ($game_night->twoPicsGames as $game) {
+        //             $game['user_has_played'] = $game->userHasPlayed(auth()->user());
+        //         }
+        //     }
+        //     if ($game_night->spotDifferencesGames) {
+        //         foreach ($game_night->spotDifferencesGames as $game) {
+        //             $game['user_has_played'] = $game->userHasPlayed(auth()->user());
+        //         }
+        //     }
 
-            if ($game_night->userCanPlay()) {
-                $game_night['can_play'] = true;
-            } else {
-                $game_night['can_play'] = false;
-            }
-        }
+        //     if ($game_night->userCanPlay()) {
+        //         $game_night['can_play'] = true;
+        //     } else {
+        //         $game_night['can_play'] = false;
+        //     }
+        // }
 
         return response()->json(['message' => '', 'data' => $game_nights], 200);
     }
