@@ -380,6 +380,10 @@ class GameNightController extends Controller
     {
         $game_nights = GameNight::with('triviaGames.triviaQuestions', 'twoPicsGames', 'spotDifferencesGames', 'category', 'users.kids')->withTrashed()->find($id);
 
+        if (!$game_nights) {
+            return pozzy_httpNotFound('Game Night not found');
+        }
+
         $kids = [];
         $leaderboard = GamesLeaderboard::where('game_night_id', $game_nights->id)->get()->unique('user_id');
         if ($leaderboard) {
