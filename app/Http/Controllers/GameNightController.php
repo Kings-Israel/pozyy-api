@@ -345,34 +345,33 @@ class GameNightController extends Controller
 
     public function getCreatorsChallenges()
     {
-        // $game_nights = GameNight::with('triviaGames.triviaQuestions', 'twoPicsGames', 'spotDifferencesGames', 'category')->get();
-        $game_nights = GameNight::all();
+        $game_nights = GameNight::with('triviaGames.triviaQuestions', 'twoPicsGames', 'spotDifferencesGames', 'category')->where('category_id', 2)->get();
 
-        // foreach ($game_nights as $key => $game_night) {
-        //     if ($game_night->triviaGames) {
-        //         foreach ($game_night->triviaGames as $trivia_game) {
-        //             foreach ($trivia_game->triviaQuestions as $question) {
-        //                 $question['user_has_played'] = $question->userHasPlayed(auth()->user());
-        //             }
-        //         }
-        //     }
-        //     if ($game_night->twoPicsGames) {
-        //         foreach ($game_night->twoPicsGames as $game) {
-        //             $game['user_has_played'] = $game->userHasPlayed(auth()->user());
-        //         }
-        //     }
-        //     if ($game_night->spotDifferencesGames) {
-        //         foreach ($game_night->spotDifferencesGames as $game) {
-        //             $game['user_has_played'] = $game->userHasPlayed(auth()->user());
-        //         }
-        //     }
+        foreach ($game_nights as $key => $game_night) {
+            if ($game_night->triviaGames) {
+                foreach ($game_night->triviaGames as $trivia_game) {
+                    foreach ($trivia_game->triviaQuestions as $question) {
+                        $question['user_has_played'] = $question->userHasPlayed(auth()->user());
+                    }
+                }
+            }
+            if ($game_night->twoPicsGames) {
+                foreach ($game_night->twoPicsGames as $game) {
+                    $game['user_has_played'] = $game->userHasPlayed(auth()->user());
+                }
+            }
+            if ($game_night->spotDifferencesGames) {
+                foreach ($game_night->spotDifferencesGames as $game) {
+                    $game['user_has_played'] = $game->userHasPlayed(auth()->user());
+                }
+            }
 
-        //     if ($game_night->userCanPlay()) {
-        //         $game_night['can_play'] = true;
-        //     } else {
-        //         $game_night['can_play'] = false;
-        //     }
-        // }
+            if ($game_night->userCanPlay()) {
+                $game_night['can_play'] = true;
+            } else {
+                $game_night['can_play'] = false;
+            }
+        }
 
         return response()->json(['message' => '', 'data' => $game_nights], 200);
     }
@@ -383,11 +382,13 @@ class GameNightController extends Controller
 
         $kids = [];
         $leaderboard = GamesLeaderboard::where('game_night_id', $game_nights->id)->get()->unique('user_id');
-        foreach ($leaderboard as $board) {
-            $kidDetails = User::with('kids.school')->find($board->kid->parent_id);
-            $kidDetails['total_points'] = GamesLeaderboard::where('user_id', $board->user_id)->where('game_night_id', $game_nights->id)->sum('total_points');
-            $kidDetails['total_time'] = GamesLeaderboard::where('user_id', $board->user_id)->where('game_night_id', $game_nights->id)->sum('total_time');
-            array_push($kids, $kidDetails);
+        if ($leaderboard) {
+            foreach ($leaderboard as $board) {
+                $kidDetails = User::with('kids.school')->find($board->kid->parent_id);
+                $kidDetails['total_points'] = GamesLeaderboard::where('user_id', $board->user_id)->where('game_night_id', $game_nights->id)->sum('total_points');
+                $kidDetails['total_time'] = GamesLeaderboard::where('user_id', $board->user_id)->where('game_night_id', $game_nights->id)->sum('total_time');
+                array_push($kids, $kidDetails);
+            }
         }
         $game_nights['leaderboard'] = $kids;
 
