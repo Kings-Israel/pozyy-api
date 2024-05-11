@@ -34,7 +34,6 @@ class videocontroller extends Controller
         $validate = Validator::make($request->all(), $rules, $messages);
 
         if ($validate->fails()) {
-            info($validate->messages());
             return pozzy_httpBadRequest($validate->messages());
         }
 
@@ -48,8 +47,8 @@ class videocontroller extends Controller
         $video->title = $request->title;
         $video->description = strip_tags($request->description);
         $video->thumbnail = config('services.app_url.url').'/storage/videos/thumbnails/'.pathinfo($request->thumbnail->store('thumbnails', 'videos'), PATHINFO_BASENAME);
-        // $video->video_url = pozzy_videoCompress($request->file('video'), $user);
-        $video->video_url = pathinfo($request->video->store('video', 'videos'), PATHINFO_BASENAME);
+        $video->video_url = pozzy_videoCompress($request->file('video'), $user);
+        // $video->video_url = pathinfo($request->video->store('video', 'videos'), PATHINFO_BASENAME);
         $video->subchannel_id = $request->has('subchannel') && $request->subchannel != 'null' ? $request->subchannel : NULL;
         $video->save();
         return pozzy_httpCreated($video);
