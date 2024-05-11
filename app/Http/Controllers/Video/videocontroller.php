@@ -19,6 +19,8 @@ class videocontroller extends Controller
 {
     public function admin_add_video(Request $request)
     {
+        info($request->all());
+
         $rules = [
             'title' => 'required',
             'thumbnail' => 'required',
@@ -36,8 +38,6 @@ class videocontroller extends Controller
         if ($validate->fails()) {
             return response()->json($validate->messages());
         }
-
-        info($request->all());
 
         $user = Auth::user();
         $video = new Video;
