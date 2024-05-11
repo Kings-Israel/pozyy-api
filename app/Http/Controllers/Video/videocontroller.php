@@ -98,7 +98,7 @@ class videocontroller extends Controller
     }
     public function admin_show_videos()
     {
-        $data = Video::orderBy('id', 'desc')->with(['user'])->get();
+        $data = Video::orderBy('id', 'desc')->with(['user'])->whereHas('user')->get();
         foreach ($data as $key => $video) {
             if($video->school_id != null) {
                 $video['school'] = School::find($video->school_id);
