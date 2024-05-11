@@ -34,6 +34,7 @@ class videocontroller extends Controller
         $validate = Validator::make($request->all(), $rules, $messages);
 
         if ($validate->fails()) {
+            info($validate->messages());
             return pozzy_httpBadRequest($validate->messages());
         }
 
