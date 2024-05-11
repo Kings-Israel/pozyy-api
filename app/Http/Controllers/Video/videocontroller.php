@@ -23,12 +23,12 @@ class videocontroller extends Controller
             'title' => 'required',
             'thumbnail' => 'required',
             'description' => 'required',
-            'video' => 'required',
+            // 'video' => 'required',
             'channel' => 'required'
         ];
 
         $messages = [
-            'video.required' => 'Please add a video'
+            // 'video.required' => 'Please add a video'
         ];
 
         $validate = Validator::make($request->all(), $rules, $messages);
