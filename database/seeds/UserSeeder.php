@@ -42,7 +42,7 @@ class UserSeeder extends Seeder
                 'username' => 'pozzy-admin',
                 'email' => 'admin@pozzy.com',
                 'phone_number' => '254728408711',
-                'password' => Hash::make('secretpassword'),
+                'password' => Hash::make('password'),
                 'created_at' => \Carbon\Carbon::now(),
                 'updated_at' => \Carbon\Carbon::now(),
             ]);
